@@ -1,0 +1,190 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "compass/reset";
+@import "compass/typography/vertical_rhythm";
+@import "compass/utilities/color/contrast";
+@import "compass/css3";
+@import "icons/*.png";
+@include all-icons-sprites;
+
+$page-width: 1024px;
+$canvas-width: 800px;
+$canvas-height: 600px;
+$pad: 10px;
+$base-font-size       : 17px;
+$base-line-height     : 30px;
+$color: #333;
+$bg-color: #eee;
+
+@mixin box{
+	@include box-shadow(0 0 5px darken($bg-color,20%));
+	@include border-radius();
+	border: 1px solid darken($bg-color,10%);
+}
+
+// establish your vertical baseline grid.
+@include establish-baseline;
+
+* {
+  @include box-sizing(border-box);
+}
+
+html{
+	font-family: Lucida Console, Comic Sans MS, Arial, sans-serif;
+}
+
+header{
+	clear: both;
+
+	h1{
+		font-family: 'Flavors', cursive;
+		@include adjust-font-size-to($base-font-size * 2,$lines:1);
+		padding: $pad;
+		color: lighten($color,20%);
+		@include background-image(linear-gradient(lighten($bg-color,10%),$bg-color,lighten($bg-color,20%)));
+	}
+}
+.wrapper{
+	margin: 0 auto !important;
+	width: $page-width;
+}
+
+.content{
+	position: relative;
+	.main{
+		width: 75%;
+	}
+	.side{
+		width: 25%;
+		padding: $pad;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		right: 0;
+
+		.chatbox{
+			position: absolute;
+			bottom: 8px;
+			left: $pad;
+			right: 0;
+
+		}
+
+		.chatwin{
+			overflow-y: auto;
+			height: $canvas-height / 2;
+
+			table{
+				height: 100%;
+				width: 100%;
+			}
+		}
+
+		#chatlog{
+			vertical-align: bottom;
+		}
+
+		.msginput{
+			height: $base-line-height;
+			width: 100%;
+			@include box;
+		}
+	}
+	.history{
+		position: absolute;
+		width: 200px;
+		left:-200px;
+		top: 0;
+	}
+	.control-group{
+		@include trailer;
+	}
+	.control-group > .label{
+		display: inline-block;
+		width: 200px;
+		vertical-align: top;
+	}
+	.control{
+		display: inline-block;
+	}
+	#teamform{
+		padding: $pad;
+
+		li{
+			border-top: 1px dotted darken($bg-color,20%);
+			padding-bottom: 4px;
+		}
+		ul{
+			border-bottom: 1px dotted darken($bg-color,20%);			
+		}
+		input{
+			border: 1px solid darken($bg-color,20%);
+			height: $base-line-height - 4px;
+			font-size: $base-font-size;
+		}
+	}
+}
+[class*="icons-"],
+.colorsel{
+	@include icons-sprite-dimensions('rect');
+	display:inline-block;
+}
+.toolbar{
+	button,
+	.button{
+		@include border-radius();
+		background-color: lighten($bg-color,20%);
+		border: 1px solid $bg-color;
+		display:inline-block;
+		
+	}
+	.button{
+		position: relative;
+		z-index: 9999;
+		&:hover{
+			#color-canvas{
+				visibility: visible;
+			}
+		}		
+	}
+	.on{
+		border: 1px solid darken($bg-color,10%);
+		background-color: $bg-color;
+	}
+
+}
+.main{
+	position: relative;
+}
+#canvas{
+	@include box;
+}
+#color-canvas{
+	position: absolute;
+	top: 24px;
+	left: 0;
+	visibility: hidden;
+	@include box;
+}
+.temp-canvas,
+.socket-canvas{
+	position: absolute;
+	top: 1px;
+	left: 1px;
+}
+.temp-canvas{
+	z-index: 2;
+}
+.socket-canvas{
+	z-index: 1;
+}
+#line-width{
+	display: inline-block;
+	width: 200px;
+	margin: 0 12px;
+}
+
+

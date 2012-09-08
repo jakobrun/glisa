@@ -1,0 +1,22 @@
+{
+  "name": "Glisa",
+  "subdomain": "glisa",
+  "scripts": {
+    "start": "server.js"
+  },
+  "version": "0.0.1-12",
+  "engines": {
+    "node": "0.8.6"
+  },
+  "dependencies": {
+    "express": "~3.0.0rc2",
+    "socket.io": "~0.9.10",
+    "jade": "~0.27.2",
+    "cookie": "0.0.x",
+    "connect": "2.4.x",
+    "everyauth": "git://github.com/bnoguchi/everyauth.git#express3",
+    "mongodb": "~1.1.6",
+    "mongojs": "~0.4.3",
+    "requirejs": "~2.0.6"
+  }
+}
