@@ -28,6 +28,15 @@
             </div>
         </div>
         <script src="/js/jquery-1.7.2.min.js"></script>
+        <script src="/js/jquery.jqote2.min.js"></script>
+        <script type="text/x-jqote-template" id="temp-channel">
+        <![CDATA[
+            <li>
+                <input id="channel<%=this.i%>" type="radio" value="<%=this.name%>"/>
+                <label for="channel<%=this.i%>"><%=this.name%></label>
+            </li>
+        ]]>
+        </script>
         <script>
             $(function($) {
                 'use strict';
@@ -36,7 +45,7 @@
                         html = '';
                     $('#user').text(data.user.name);
                     for (var i = 0;i < channels.length; i++) {
-                        html += '<li><input id="channel' + i + '" type="radio" name="channel" value="'+channels[i].name+'"/><label for="channel' + i + '">' + channels[i].name + '</label></li>';
+                        html += $('#temp-channel').jqote({i: i,name: channels[i].name});
                     }
                     $('#channellist').prepend(html);
                 });

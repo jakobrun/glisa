@@ -2,139 +2,200 @@ requirejs.config({
 		paths:{
 			'jquery':'jquery-1.7.2.min',
 			'jquery-ui':'jquery-ui-1.8.22.custom.min',
-			'io' : 'socket.io'
+			'io' : 'socket.io',
+			'hogan' : 'HoganTemplate',
+			'underscore': 'underscore-min'
 		},
 		shim: {
 			'jquery': {exports : 'jQuery'},
-			'io': {exports: 'io'}
+			'underscore': {exports : '_'},
+			'io': {exports: 'io'},
+			'hogan' : {exports: 'Hogan'}
 		}
 });
 require(
-	['jquery', 'io', 'colorpicker', 'painter', 'jquery-ui'],
-function($, io, colorPicker, painter) {
+	['jquery','underscore', 'io', 'tabs', 'colorpicker', 'canvasControl', 'templ/users','templ/user', 'templ/canvas', 'jquery-ui'],
+function($, _, io, tabs, colorPicker, canvasControl, templUsers,templUser, templCanvas) {
 	'use strict';
-	var chatlog = $('#chatlog'),
-		channelname = urlParam('channel') || urlParam('newchannel'),
-		users = {},
-		cp = colorPicker(document.getElementById("color-canvas"));
+	function log(msg){
+		console.log(msg);
+	}
 
 	// if browser doesn't support WebSocket, just show some notification and exit
     if (!io) {
-        chatlog.html($('<p>', { text: 'Sorry, but your browser doesn\'t support socket.io.'} ));
+        $('div.content').html($('<p>', { text: 'Sorry, but your browser doesn\'t support socket.io.'} ));
         return;
     }
 
     // open connection
-	var socket = io.connect('http://glisa.jit.su');
-	socket.on('open', function () {
-		socket.emit('join',{channel: channelname});
-	});
+	var socket = io.connect('http://glisa.jit.su'),
+		myTabs = tabs($('.content'));
 
-	socket.on('init', function(data){
-		//Create painter
-		var canvasPainter = painter(document, {
-			onPaint : function(ev){
-				socket.emit("paint",ev);
-			}
-		});
+	socket.on('open', function (data) {
+		//User
+		var user = data.user,
+			cavasControlsById = {},
+			findfriendInp = $('#findfriend'),
+			usersresult = $('#usersresult');
 
-		//Show users
-		var html = '';
-		for (var i = 0;i < data.users.length; i++) {
-			var u = data.users[i];
-			users[u.color] = u;
-			u.painter = canvasPainter.socketPainter();
-			html += '<li style="color:'+u.color+'" class="' + u.color + '">' + u.username + '</li>';
+		//Buttons
+		var btFriendRequest = {classname: 'confirm', label: 'Confirm'},
+			btFriend = [{classname: 'chat', label: 'Chat'},{classname: 'remove', label: 'Remove'}];
+		function getButtons(context){
+			if(context.status==='requesting')
+				return btFriendRequest;
+			else if(context.status==='friend')
+				return btFriend;
+			return [];
 		}
-		$('#users ul').html(html);
-	
-		// On new user
-		socket.on('newuser', function(user){
-			users[user.color] = user;
-			user.painter = canvasPainter.socketPainter();
-			var html = '<li style="color:'+user.color+'" class="' + user.color + '">' + user.username + '</li>';
-			$('#users ul').append(html);
+
+		findfriendInp.focus();
+
+		user.findFriendById = function (friendId) {
+			return _.find(user.friends, function (f){ return f._id == friendId;});
+		};
+
+		user.addFriend = function (friend) {
+			user.friends.push(friend);
+		};
+
+		user.removeFriendById = function (friendId) {
+			user.friends = _.filter(user.friends, function (f) {return f._id != friendId;});
+		};
+
+		//show user
+		$('#user').text(user.name);
 
 
-		});
+		//Show friends
+		$('#friends').html(templUsers.render({users: user.friends,
+			buttons: function(){return getButtons(this);}
+		},{user: templUser}));
 
-		//Clear
-		socket.on('clear', function(){
-			canvasPainter.clear();
-		});
-
-		//Send message on enter
-		$('input.msginput').keydown(function(e){
-			if(e.keyCode!==13)
+		//Find friend
+		findfriendInp.keyup(function(e){
+			var name = $(this).val();
+			if(!name){
+				usersresult.html('');
 				return;
-			var t = $(this);
-			socket.emit('msg',{text: t.val()});
-			t.val('');
-		});
-
-		$('button.new').click(function(e){
-			if(window.confirm("Are you sure you want a new canvas?")){
-				canvasPainter.clear();
-				socket.emit('clear');
 			}
+
+			$.get('/app/findusers',{name: name},function(data){
+				//Show users
+				usersresult.html(templUsers.render({
+					users: data,
+					buttons: function(){
+						if(user.findFriendById(this._id))
+							return;
+						else return {classname: 'add', label: 'Add'};
+					}
+				},{user: templUser}));
+			});
 		});
 
-		//Brush click
-		$('button.brush').click(function(e){
-			$('button.on').removeClass("on");
-			$(this).addClass('on');
-			canvasPainter.setTool('brush');
+		//Friend online/offline
+		socket.on('friend-status-change', function (data){
+			var userFriend = user.findFriendById(data._id);
+			userFriend.online = data.online;
+			var friendElm = $('#friends [data-id="'+data._id+'"]');
+			userFriend.buttons = function(){return getButtons(this);};
+			friendElm.replaceWith(templUser.render(userFriend));
 		});
 
-		//Rect click
-		$('button.rect').click(function(e){
-			$('button.on').removeClass("on");
-			$(this).addClass('on');
-			canvasPainter.setTool('rect');
+		//Add friend
+		$('button.add').live('click', function (){
+			var userElm = $(this).closest('li'),
+				id = userElm.attr('data-id');
+			//add friend
+			socket.emit('add-friend',{id: id});
+			findfriendInp.val('');
+			usersresult.html('');
 		});
 
-		//Line click
-		$('button.line').click(function(e){
-			$('button.on').removeClass("on");
-			$(this).addClass("on");
-			canvasPainter.setTool('line');
+		//Friend added
+		socket.on('friend-added', function (friend) {
+			log('friend added');
+			friend.status = 'request';
+			user.addFriend(friend);
+			$('#friends ul').append(templUser.render(friend));
 		});
 
-		//Color picker
-		cp.onChange(function(color){
-			$('#colorsel').css('background-color',color);
-			canvasPainter.setColor(color);
+		//Friend request
+		socket.on('friend-request', function (friend) {
+			log('friend request');
+			friend.status = 'requesting';
+			user.addFriend(friend);
+			friend.buttons = function(){ return btFriendRequest;};
+			$('#friends ul').append(templUser.render(friend));
 		});
 
-		//Line width
-		$('#line-width').slider({change: function(e){
-				canvasPainter.setLineWidth($(this).slider("option","value"));
-			},
-			min: 1,
-			max: 60,
-			value: 1
+		//Confirm friend
+		$('button.confirm').live('click', function (){
+			var userElm = $(this).closest('li'),
+				id = userElm.attr('data-id'),
+				friend = user.findFriendById(id);
+			//add friend
+			socket.emit('confirm-friend',{_id: id});
+			friend.status = 'friend';
+			friend.buttons = function(){return btFriend;};
+			userElm.replaceWith(templUser.render(friend));
 		});
 
-	
+		//Friend confirmed
+		socket.on('friend-confirmed', function (friend){
+			log('friend confirmed');
+			var userFriend = user.findFriendById(friend._id);
+			userFriend.status = 'friend';
+			var friendElm = $('#friends [data-id="'+friend._id+'"]');
+			userFriend.buttons = function(){return btFriend;};
+			friendElm.replaceWith(templUser.render(userFriend));
+		});
+
+		//Remove friend
+		$('button.remove').live('click', function() {
+			var userElm = $(this).closest('li'),
+				id = userElm.attr('data-id');
+			socket.emit('remove-friend', {_id: id});
+		});
+
+		//Friend removed
+		socket.on('friend-removed', function (friend){
+			log('friend removed');
+			user.removeFriendById(friend._id);
+			$('#friends [data-id="'+friend._id+'"]').remove();
+		});
+
+
+		//Start chat
+		$('button.chat').live('click', function(){
+			var id		= $(this).closest('li').attr('data-id'),
+				friend	= user.findFriendById(id);
+			socket.emit('create-room', {_id: id});
+		});
+
+		//Chat init
+		socket.on('init', function (data){
+			var friend = _.find(data.users, function(u){ return u._id!=user._id;});
+			var tab = myTabs.addTab(data.id, friend?friend.name:"Not logged in", templCanvas.render({id: data.id, users: data.users}));
+			tab.show();
+			var cc = canvasControl(tab.body, {onPaint: function (event){
+					event.id = data.id;
+					socket.emit('paint',event);
+				}
+			});
+			cc.addUsers(data.users);
+			cavasControlsById[data.id] = cc;
+		});
+
+		//Paint
+		socket.on('paint', function (data){
+			var cc = cavasControlsById[data.id];
+			cc.paint(data);
+		});
+
 	});
 
-	socket.on('useroff', function(user){
-		$('li.' + user.color).remove();
-	});
-
-	//Message
-	socket.on('msg', function(data){
-		var html = '<p><span style="color:' + data.user.color + '">' + data.user.username + '</span> @ '+ formatTime(new Date(data.time)) + ': <br>' + data.text + '</p>';
-		chatlog.append(html);
-		var objDiv = $('.chatwin').get()[0];
-		objDiv.scrollTop = objDiv.scrollHeight;
-	});
-
-	//Paint
-	socket.on('paint',function(sEvent){
-		users[sEvent.user.color].painter.paint(sEvent);
-	});
-
+	//Format time
 	function formatTime(dt){
 		var h = dt.getHours(),
 			m = dt.getMinutes(),
@@ -146,10 +207,4 @@ function($, io, colorPicker, painter) {
 	function fte(e){
 		return e <10 ? '0' + e : e;
 	}
-
-	function urlParam(name){
-		var results = new RegExp('[?&]' + name + '=([^&#]*)').exec(top.window.location.href);
-		return (results !== null) ? decodeURIComponent(results[1]) : 0;
-	}
-
 });

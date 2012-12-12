@@ -5,14 +5,28 @@
         <title>Glisa</title>
         <link href='http://fonts.googleapis.com/css?family=Flavors' rel='stylesheet' type='text/css'>
         <link type="text/css" href="/css/screen.css" rel="Stylesheet" />
+        <link type="text/css" href="/js/jquery/css/ui-lightness/jquery-ui-1.8.22.custom.css" rel="Stylesheet"/>
     </head>
     <body>
         <div class="wrapper">
             <header>
-               <h1>Glisa</h1>
+                <h1>Glisa</h1>
+                <div class="search">
+                    <label for="findfriend">Find friends</label>
+                    <input id="findfriend" placeholder="search for people"/>
+                    <div id="usersresult"></div>
+                </div>
+                <div id="user"></div>
             </header>
             <div class="content">
+                <ul class="tabs">
+                    <li><a href="#friendlist" class="tab active">Friends</a></li>
+                </ul>
+                <div class="friends" id="friendlist">
+                    <div id="friends"></div>
+                </div>
             </div>
         </div>
+        <script type="text/javascript" data-main="/js/client" src="/js/require.js"></script>
     </body>
 </html>

@@ -13,7 +13,8 @@ var express = require("express"),
 	config = require("./config"),
 	port = process.env.PORT || 8000,
 	log = console.log,
-	channels = [];
+	_ = require('underscore'),
+	socketsById = {};
 
 //Everyauth
 everyauth.everymodule.findUserById( function (id, callback) {
@@ -33,7 +34,7 @@ everyauth.google
     googleUser.expiresIn = extra.expires_in;
 
     var promise = new this.Promise();
-    model.User.find('google', googleUser.id,function(err, doc){
+    model.User.findBySourceId('google', googleUser.id,function(err, doc){
 		if(err) promise.fail(err);
 		else if(doc) promise.fulfill(doc);
 		else{
@@ -45,7 +46,7 @@ everyauth.google
     });
     return promise;
   })
-  .redirectPath('/app/channel.html');
+  .redirectPath('/app/');
 
 //Express config
 app.configure(function () {
@@ -65,32 +66,27 @@ app.configure(function () {
 	app.set('view engine', 'jade');
 });
 
-app.get("/", function(req,res,next){
+//Login redirects
+app.get("/", function(req, res, next){
 	if(req.session.auth && req.session.auth.loggedIn)
-		res.redirect('/app/channel.html');
+		res.redirect('/app/');
 	else
 		next();
 });
-
-app.all("/app/*", function(req,res,next){
+app.all("/app/*", function(req, res, next){
 	if(req.session.auth && req.session.auth.loggedIn)
 		next();
 	else
 		res.redirect("/");
 });
 
-//get channels
-app.get('/init',function(req,res){
-	var data = {};
-	if(req.user){
-		data.user = req.user;
-		data.channels = [];
-		for(var i = 0; i<channels.length; i++){
-			data.channels.push({name: channels[i].name});
-		}
-	}
-	res.send(data);
+//find users
+app.get('/app/findusers', function(req, res){
+	model.User.findByName(req.param('name'), req.user._id, function(err,docs){
+		res.send(docs);
+	});
 });
+
 
 //Configure sockets
 io.configure(function (){
@@ -106,7 +102,6 @@ io.configure(function (){
 					log("connect session to socket");
 					data.session = session;
 					data.auth = session.auth;
-					log(data.auth);
 					accept(null, true);
 				}
 			});
@@ -120,107 +115,181 @@ io.configure(function (){
 io.sockets.on('connection', function (socket) {
 	console.log((new Date()) + ' Connection');
 
-	socket.emit('open',{status:'open'});
+	var hs = socket.handshake;
+	if(!hs.auth)
+		return;
 
-	//Join channel
-	socket.on('join',function(msg){
-		var hs = socket.handshake;
-		if(!msg.channel || !hs.auth)
-			return;
-
-		//Find channel
-		var channel = false;
-		for (var i = channels.length - 1; i >= 0; i--) {
-			if(channels[i].name === msg.channel){
-				channel = channels[i];
-				break;
+	model.User.findById(hs.auth.userId, function(err, doc){
+		socket.user = doc;
+		socket.socketUser = new SocketUser(doc, socket);
+		doc.friends.forEach( function (f){
+			var fSocket = socketsById[f._id];
+			if(fSocket){
+				f.online = true;
+				fSocket.emit('friend-status-change',{_id: doc._id, online: true});
+			}else{
+				f.online = false;
 			}
-		}
-		if(channel===false){
-			channel = new Channel(msg.channel);
-			channels.push(channel);
-		}
-
-		//add user
-		channel.addUser(socket, hs.auth.google.user.name);
+		});
+		socketsById[doc._id] = socket;
+		socket.emit('open',{status:'open', user: doc});
 	});
 
-});
+	//Add friend
+	socket.on('add-friend', function (data){
+		model.User.findById(data.id, function (err, friend){
+			if(err) log(err);
+			else{
+				model.User.addFriend(socket.user,friend, function (err, users /*array*/){
+					if(err) log(err);
+					else{
+						socket.user = users[0];
+						socket.emit('friend-added', friend);
+						var friendSocket = socketsById[friend._id];
+						if(friendSocket){
+							friendSocket.user = users[1];
+							friendSocket.emit('friend-request',socket.user);
+						}
+					}
+				});
+			}
+		});
+	});
 
-//channel
-function Channel(name){
-	this.name = name;
-	this.users = [];
-	this.sockets = [];
+	//Confirm friend request
+	socket.on('confirm-friend', function (data){
+		var fr = model.User.findFriend(socket.user,data._id);
+		if(!fr){
+			log("Did not find friend by id: "+data._id);
+			return;
+		}
 
-	// Array with some colors
-	this._colors = [ 'red', 'green', 'blue', 'magenta', 'purple', 'plum', 'orange' ];
-	// ... in random order
-	this._colors.sort(function(a,b) { return Math.random() > 0.5; } );
+		model.User.acceptFriend(socket.user, fr, function (err, friendreq){
+			if(err){
+				log(err);
+				return;
+			}
+			var friendsocket = socketsById[friendreq._id];
+			if(friendsocket)
+				friendsocket.emit('friend-confirmed', socket.user);
+		});
+	});
 
-}
-Channel.prototype.addUser = function(socket,username){
-	var self = this;
-	var color = this._colors.shift();
-	var user = new User( username, color);
-	log("emit newuser: "+username);
-	this.emit('newuser',user);
-	this.users.push(user);
-	this.sockets.push(socket);
+	//Remove friend
+	socket.on('remove-friend', function (data){
+		model.User.findById(data._id, function (err, friend){
+			model.User.removeFriend(socket.user, friend, function (err, users){
+				if(err){
+					log(err);
+					return;
+				}
+				socket.user = users[0];
+				socket.emit('friend-removed', users[1]);
+				var friendsocket = socketsById[users[1]._id];
+				if(friendsocket){
+					friendsocket.user = users[1];
+					friendsocket.emit('friend-removed', socket.user);
+				}
+			});
+		});
+	});
 
-	log("emit init: "+username);
-	socket.emit('init',{users: this.users});
+	//Create room
+	socket.on('create-room', function (data){
+		var channel = new Channel(),
+			friendSocket = socketsById[data._id];
+		channel.addUser(socket.socketUser);
+		if(friendSocket)
+			channel.addUser(friendSocket.socketUser);
+		
+		log("emit init: "+channel.id);
+		var users = _.map(channel.socketusers,function(su){return su.user;});
+		channel.emit('init',{id: channel.id, users: users});
+	});
 
 	//Disconnect
 	socket.on('disconnect', function(){
-		self.removeUser(user);
+		delete socketsById[socket.user._id];
+		var channels = socket.socketUser.channelsById;
+		for(var id in channels){
+			channels[id].removeUser(socket.socketUser);
+		}
+		socket.user.friends.forEach(function (f){
+			var fSocket = socketsById[f._id];
+			if(fSocket)
+				fSocket.emit('friend-status-change', {_id: socket.user._id, online: false});
+		});
 	});
 
 	//Message
 	socket.on('msg', function(data){
-		data.user = user;
-		data.time = (new Date()).getTime();
-		self.emit('msg', data);
+		socket.socketUser.emitAll('msg',data);
 	});
 
 	//Paint
 	socket.on('paint', function(data){
-		data.user = user;
-		data.time = (new Date()).getTime();
-		self.emit('paint', data, user /* not to the user that is painting*/);
+		socket.socketUser.emit('paint',data);
 	});
 
 	//Clear
 	socket.on('clear', function(){
-		var data = {user: user,
-					time: (new Date()).getTime()};
-		self.emit('clear',data, user/* not to the user that is painting*/);
+		socket.socketUser.emit('clear',{});
 	});
+});
+
+//channel
+function Channel(){
+	this.id = Channel.counter();
+	this.socketusers = [];
+}
+Channel.counter = counter("r");
+Channel.prototype.addUser = function(socketUser){
+	this.socketusers.push(socketUser);
+	socketUser.channelsById[this.id] = this;
+	log("emit newuser: "+socketUser.user.name);
+	this.emit('newuser',socketUser.user);
+
 };
-Channel.prototype.removeUser = function(user){
-	var index = this.users.indexOf(user);
-	this._colors.push(user.color);
-	this.users.splice(index,1);
-	this.sockets.splice(index,1);
-	if(this.users.length===0){
-		var channelIndex = channels.indexOf(this);
-		channels.splice(channelIndex,1);
-	}
-	this.emit('useroff',user);
+Channel.prototype.removeUser = function(socketUser){
+	var index = this.socketusers.indexOf(socketUser);
+	delete socketUser.channelsById[this.id];
+	this.socketusers.splice(index,1);
+
+	this.emit('useroff',socketUser.user);
 };
 Channel.prototype.emit = function(type,msg,user){
-	for (var i = this.users.length - 1; i >= 0; i--) {
-		if(this.users[i]===user)
+	for (var i = this.socketusers.length - 1; i >= 0; i--) {
+		if(this.socketusers[i]===user)
 			continue;
 
-		this.sockets[i].emit(type,msg);
+		this.socketusers[i].socket.emit(type,msg);
 	}
 };
 
 //User
-function User(username,color){
-	this.username = username;
-	this.color = color;
+function SocketUser(user, socket){
+	this.socket = socket;
+	this.user = {name: user.name,_id: user._id,picture: user.picture};
+	this.channelsById = {};
+}
+SocketUser.prototype.emitAll = function (type, data){
+	this.emit(type,data,true);
+};
+
+SocketUser.prototype.emit = function (type, data, all){
+	data.user = this.user;
+	data.time = (new Date()).getTime();
+	var c = this.channelsById[data.id];
+	if(c) c.emit(type, data, all? null : this);
+};
+
+//Counter
+function counter(prefix){
+	var c = 0;
+	return function(){
+		c++;
+		return prefix+c;
+	};
 }
 
 //Start

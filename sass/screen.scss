@@ -11,18 +11,21 @@
 @include all-icons-sprites;
 
 $page-width: 1024px;
-$canvas-width: 800px;
+$canvas-width: 970px;
 $canvas-height: 600px;
 $pad: 10px;
 $base-font-size       : 17px;
 $base-line-height     : 30px;
 $color: #333;
 $bg-color: #eee;
+$popup-bg-color: #fff;
+$complementary-color: #f66;
 
 @mixin box{
 	@include box-shadow(0 0 5px darken($bg-color,20%));
 	@include border-radius();
 	border: 1px solid darken($bg-color,10%);
+	text-decoration:;
 }
 
 // establish your vertical baseline grid.
@@ -38,6 +41,7 @@ html{
 
 header{
 	clear: both;
+	position: relative;
 
 	h1{
 		font-family: 'Flavors', cursive;
@@ -46,91 +50,136 @@ header{
 		color: lighten($color,20%);
 		@include background-image(linear-gradient(lighten($bg-color,10%),$bg-color,lighten($bg-color,20%)));
 	}
+	.search{
+		position: absolute;
+		left: $page-width/4;
+		top: $pad;
+		label{
+			display: none;
+		}
+		input{
+			width: 400px;
+		}
+	}
+}
+#usersresult{
+	position: absolute;
+	@include box;
+	width: 400px;
+	z-index: 999;
+	background-color: $popup-bg-color;
+	li{
+		overflow: hidden;
+		border-bottom:1px solid $bg-color;
+		position: relative;
+	}
+
+}
+#friends{
+	li{
+		position: relative;
+		overflow: hidden;
+		display: inline-block;
+		width: $page-width/3 -$pad*3;
+		@include box;
+		&:hover{
+			@include box-shadow(0 0 15px $complementary-color);
+		}
+	}
+	.user-pic{
+		height: 120px;
+	}
+}
+.add,
+.confirm{
+	display: block;
+	position: absolute;
+	bottom: $pad;
+	right: $pad;
+}
+#user{
+	position: absolute;
+	right: $pad;
+	top: $pad;
 }
 .wrapper{
 	margin: 0 auto !important;
 	width: $page-width;
 }
-
-.content{
-	position: relative;
-	.main{
-		width: 75%;
-	}
-	.side{
-		width: 25%;
-		padding: $pad;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		right: 0;
-
-		.chatbox{
-			position: absolute;
-			bottom: 8px;
-			left: $pad;
-			right: 0;
-
-		}
-
-		.chatwin{
-			overflow-y: auto;
-			height: $canvas-height / 2;
-
-			table{
-				height: 100%;
-				width: 100%;
-			}
-		}
-
-		#chatlog{
-			vertical-align: bottom;
-		}
-
-		.msginput{
-			height: $base-line-height;
-			width: 100%;
-			@include box;
-		}
-	}
-	.history{
-		position: absolute;
-		width: 200px;
-		left:-200px;
-		top: 0;
-	}
-	.control-group{
-		@include trailer;
-	}
-	.control-group > .label{
-		display: inline-block;
-		width: 200px;
-		vertical-align: top;
-	}
-	.control{
-		display: inline-block;
-	}
-	#teamform{
-		padding: $pad;
-
-		li{
-			border-top: 1px dotted darken($bg-color,20%);
-			padding-bottom: 4px;
-		}
-		ul{
-			border-bottom: 1px dotted darken($bg-color,20%);			
-		}
-		input{
-			border: 1px solid darken($bg-color,20%);
-			height: $base-line-height - 4px;
-			font-size: $base-font-size;
-		}
+.user-pic{
+	float: left;
+	overflow: hidden;
+	margin: 2px;
+	height: 60px;
+	@include border-radius();
+	img{
+		height: 100%;
 	}
 }
+.user-info{
+	float: left;
+	padding: 2px $pad;
+	max-width: 184px;
+}
+.content{
+	position: relative;
+}
+
+.tabs{
+	overflow: hidden;
+	>li{
+		@include border-radius(30px);
+		border: 1px solid darken($bg-color,10%);
+		float: left;
+		padding: 0;
+		margin-right: $pad;
+		a{
+			padding: $pad/2;
+		}
+		&:hover a.icons-closetab{
+			visibility: visible;
+		}
+	}
+	a.active{
+		color: $complementary-color;
+	}
+}
+.canvas-content{
+	background-color: #fff;
+	z-index: 888;
+	.main{
+		float: left;
+		width: $canvas-width;
+	}
+	.users{
+		float: right;
+		li{
+			position: relative;
+		}
+		.title {
+			display: none;
+		}
+		img{
+			width: 50px;
+		}
+	}
+	.msginput{
+		height: $base-line-height;
+		width: 100%;
+		@include box;
+	}
+}
+
 [class*="icons-"],
 .colorsel{
 	@include icons-sprite-dimensions('rect');
 	display:inline-block;
+}
+a.icons-closetab{
+	width: 16px;
+	height: 16px;
+	margin-right: $pad/2;
+	visibility: hidden;
 }
 .toolbar{
 	button,
@@ -145,7 +194,7 @@ header{
 		position: relative;
 		z-index: 9999;
 		&:hover{
-			#color-canvas{
+			.color-canvas{
 				visibility: visible;
 			}
 		}		
@@ -159,10 +208,10 @@ header{
 .main{
 	position: relative;
 }
-#canvas{
+.canvas{
 	@include box;
 }
-#color-canvas{
+.color-canvas{
 	position: absolute;
 	top: 24px;
 	left: 0;
@@ -181,10 +230,43 @@ header{
 .socket-canvas{
 	z-index: 1;
 }
-#line-width{
+.line-width{
 	display: inline-block;
 	width: 200px;
 	margin: 0 12px;
+}
+
+.chat-bubble {
+	position: absolute;
+	top: 0;
+	left: -310px;
+	background-color:#EDEDED;
+	margin: 10px auto;
+	padding: 10px;
+	width:300px;
+	@include box-shadow(0 0 5px darken($bg-color,20%));
+	@include border-radius();
+	border: 2px solid #666666;
+	.arrow-border {
+		border-color: transparent transparent transparent #666666;
+		border-style: solid;
+		border-width: 10px;
+		height:0;
+		width:0;
+		position:absolute;
+		top: 10px;
+		right: -22px;
+	}
+	.arrow {
+		border-color: transparent transparent transparent #EDEDED;
+		border-style: solid;
+		border-width: 10px;
+		height:0;
+		width:0;
+		position:absolute;
+		top: 10px;
+		right: -19px;
+	}
 }
 
 

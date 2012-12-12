@@ -3,9 +3,8 @@ define(['myutil'],function(util) {
 	'use strict';
 
 		//Painter
-	return function (document, listener) {
-		var canvaso = document.getElementById("canvas"),
-			contexto = canvaso.getContext("2d"),
+	return function (canvaso, listener) {
+		var contexto = canvaso.getContext("2d"),
 			canvas = document.createElement("canvas"),
 			// Set the pencil tool default.
 			currenttool = 'brush',
@@ -230,5 +229,5 @@ define(['myutil'],function(util) {
 			}
 		};
 
-	}
+	};
 });

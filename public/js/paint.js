@@ -11,7 +11,7 @@ function painter(socket,user) {
 	canvas.addEventListener('mousemove', ev_canvas, false);
 	canvas.addEventListener('mouseup',   ev_canvas, false);
 
-	// This painting tool works like a drawing pencil which tracks the mouse 
+	// This painting tool works like a drawing pencil which tracks the mouse
 	// movements.
 	function tool_pencil () {
 		var tool = this;
@@ -25,8 +25,8 @@ function painter(socket,user) {
 			tool.started = true;
 		};
 
-		// This function is called every time you move the mouse. Obviously, it only 
-		// draws if the tool.started state is set to true (when you are holding down 
+		// This function is called every time you move the mouse. Obviously, it only
+		// draws if the tool.started state is set to true (when you are holding down
 		// the mouse button).
 		this.mousemove = function (ev) {
 			if (tool.started) {
@@ -56,18 +56,11 @@ function painter(socket,user) {
         context.stroke();
 	}
 
-	// The general-purpose event handler. This function just determines the mouse 
+	// The general-purpose event handler. This function just determines the mouse
 	// position relative to the canvas element.
 	function ev_canvas (ev) {
 		ev._x = ev.pageX - canvas.offsetLeft;
         ev._y = ev.pageY - canvas.offsetTop;
-		// if (ev.layerX) { // Firefox
-		// 	ev._x = ev.layerX;
-		// 	ev._y = ev.layerY;
-		// } else if (ev.offsetX || ev.offsetX == 0) { // Opera
-		// 	ev._x = ev.offsetX;
-		// 	ev._y = ev.offsetY;
-		// }
 
 		// Call the event handler of the tool.
 		var func = tool[ev.type];
@@ -88,4 +81,4 @@ function painter(socket,user) {
 		}
 	});
 
-};
+}

@@ -1,0 +1,1 @@
+window.templates = window.templates || {}; define(["hogan"], function(Hogan){templates.users = new Hogan.Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<ul>");_.b("\n" + i);if(_.s(_.f("users",c,p,1),c,p,0,16,31,"{{ }}")){_.rs(c,p,function(c,p,_){_.b(_.rp("user",c,p,"		"));});c.pop();}_.b("</ul>");return _.fl();;}); return templates.users});
