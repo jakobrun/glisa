@@ -1,1 +1,0 @@
-window.templates = window.templates || {}; define(["hogan"], function(Hogan){templates.hallo = new Hogan.Template(function(c,p,i){var _=this;_.b(i=i||"");_.b("<p>Halló ");_.b(_.v(_.f("greet",c,p,0)));_.b(".</p>");return _.fl();;}); return templates.hallo});

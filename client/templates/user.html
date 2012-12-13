@@ -1,0 +1,12 @@
+<li data-id="{{_id}}">
+	<div class="user-pic">
+		<img src="{{picture}}"></img>
+	</div>
+	<div class="user-info">
+		<p>{{name}}</p>
+		<div data-icon="c" class="online-{{online}}"></div>
+		{{#buttons}}
+		<button class="{{classname}}" data-icon="{{icon}}">{{label}}</button>
+		{{/buttons}}
+	</div>
+</li>

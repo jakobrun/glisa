@@ -2,6 +2,7 @@
 var mongojs = require('mongojs'),
 	async = require('async'),
 	config = require('./config'),
+	time = require('./time'),
 	_ = require('underscore'),
 	c = mongojs.connect(config.mongo.connectionString,['user']);
 'use strict';
@@ -9,6 +10,10 @@ var mongojs = require('mongojs'),
 function User () {
 	
 }
+
+User.logAllOut = function(cb){
+	c.user.update({'online': true}, {$set : {'online': false}},{multi: true}, cb);
+};
 
 User.findOne = function(){
 	if(arguments.length===2){
@@ -24,6 +29,49 @@ User.findBySourceId = function (source, id, cb){
 	});
 };
 
+User.login = function(id, cb){
+	User.findById(id, function(err, doc){
+		if(err){
+			cb(err);
+		}else if(doc.online){
+			cb(err,doc);
+		}else{
+			doc.online = true;
+			User.updateOnline(doc, cb);
+		}
+	});
+};
+
+User.logout = function(user, cb){
+	user.online = false;
+	User.updateOnline(user, cb);
+};
+
+User.tick = function(user, cb, tcb) {
+	user.onlinetime = time.now();
+	c.user.update({_id: user._id}, { $set: {onlinetime: user.onlinetime}}, function(err){
+		if(cb)
+			cb(err, user);
+	});
+	time.setTimeout( function(){
+		User.findById(user._id.toString(), function(err, user){
+			var diff = time.now() - (user? user.onlinetime: 0);
+			if(diff > 28000){
+				User.logout(user,tcb);
+			}
+
+		});
+	}, 30000);
+};
+
+User.updateOnline = function(user, cb){
+	console.log(user.name, 'online:', user.online);
+	c.user.update({_id: user._id}, { $set : {online: user.online}}, function(err){
+		if(cb)
+			cb(err, user);
+	});
+};
+
 User.findById = function (id, cb){
 	c.user.findOne({_id: c.ObjectId(id)},cb);
 };
@@ -34,7 +82,26 @@ User.findByName = function (name, userid, cb){
 };
 
 User.update = function (doc, cb){
-	c.user.update({_id: doc._id}, doc, {multy: false}, cb);
+	c.user.update({_id: doc._id}, doc, {multi: false}, cb);
+};
+
+User.findFriendsOnlineStatus = function(user, cb){
+	var query = {_id: { $in: _.map(user.friends, function(f){return f._id;}) }};
+	c.user.find(query,{friends: 0}, function(err, list){
+		if(err) cb(err);
+		else{
+			list.forEach(function(friend){
+				var f = User.findFriend(user, friend._id);
+				f.online = friend.online;
+				f.onlinetime = friend.onlinetime;
+			});
+			cb(err, user);
+		}
+	});
+};
+
+User.findOnlineFriends = function (user, cb) {
+	c.user.find({'friends._id': user._id, 'online': true}, cb);
 };
 
 User.addFriend = function (user, friend, cb) {

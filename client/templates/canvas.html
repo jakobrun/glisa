@@ -1,0 +1,36 @@
+<div class="canvas-content" id="{{id}}">
+    <div class="toolbar">
+        <button class="new" data-icon="n"></button>
+        <button class="on brush" data-icon="b"></button>
+        <button class="rect" data-icon="r"></button>
+        <button class="line" data-icon="l"></button>
+        <div class="button">
+            <i class="colorsel" id="colorsel"></i>
+             <canvas class="color-canvas" width="256" height="256"></canvas>
+        </div>
+        <div class="line-width">
+            <input type="range" min="1" max="60" value="1">
+        </div>
+    </div>
+    <div class="main">
+        <canvas class="canvas" width="970" height="600"></canvas>
+        <input type="text" class="msginput" placeholder="new message..."/>
+        <div class="users">
+            <ul>
+                {{#users}}
+                    <li>
+                        <div class="user-pic">
+                            <img src="{{picture}}" title="{{name}}"></img>
+                        </div>
+                        <div data-id="{{_id}}" class="chat-bubble">
+                            <div class="text"></div>
+                            <div class="arrow-border"></div>
+                            <div class="arrow"></div>
+                        </div>
+                    </li>
+                {{/users}}
+            </ul>
+        </div>
+    </div>
+   
+ </div>
