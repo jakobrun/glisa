@@ -18,8 +18,13 @@ function canvasControl(painter, colorpicker, $) {
 			$(button).addClass('on');
 		}
 
+		//New
+		contextElm.find('button.new').click( function (e){
+			myPainter.clear();
+		});
+
 		//Brush click
-		contextElm.find('button.brush').click(function(e){
+		contextElm.find('button.brush').click( function (e){
 			setOn(this);
 			myPainter.setTool('brush');
 		});
