@@ -38,6 +38,11 @@ exports.actions = function(req, res, ss) {
       ss.publish.channel(event.id, 'paint', event);
     },
 
+    clear: function (event) {
+      event.userId = req.session.userId;
+      ss.publish.channel(event.id, 'clear', event);
+    },
+
     message: function (event) {
       event.userId = req.session.userId;
       ss.publish.channel(event.id, 'message', event);

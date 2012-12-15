@@ -171,13 +171,16 @@ function userInit(user) {
     var friend = _.find(data.users, function(u){ return u._id!=user._id;});
     var tab = myTabs.addTab(data.id, friend? friend.name : 'Not logged in', ss.tmpl['canvas'].render({id: data.id, users: data.users}));
     tab.show();
-    var cc = canvasControl(tab.body, {
+    var cc = canvasControl(tab.body, ss, {
       onPaint: function (event){
         event.id = data.id;
         ss.rpc('chat.paint',event);
       },
       onMessage: function(msg){
         ss.rpc('chat.message',{id: data.id,msg: msg});
+      },
+      onClear: function (event){
+        ss.rpc('chat.clear', {id: data.id});
       }
     });
     cc.addUsers(data.users);
@@ -194,13 +197,21 @@ function userInit(user) {
 
   //Paint
   ss.event.on('paint', function(data) {
+    if(user.userId === user._id){
+      return 0;
+    }
     var cc = cavasControlsById[data.id];
     cc.paint(data);
   });
 
+  //Clear
+  ss.event.on('clear', function (data) {
+    cavasControlsById[data.id].onClear(data);
+  });
+
   //Message
   ss.event.on('message', function(data) {
-    cavasControlsById[data.id].onMessage(data)
+    cavasControlsById[data.id].onMessage(data);
   });
 }
 

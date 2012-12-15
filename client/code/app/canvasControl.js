@@ -5,13 +5,14 @@ function canvasControl(painter, colorpicker, $) {
 	'use strict';
 
 		//Painter
-	return function (contextElm, listener) {
+	return function (contextElm, ss, listener) {
 		var canvaso = contextElm.find("canvas.canvas").get(0),
 			colorbutton = contextElm.find(".colorsel"),
 			myPainter = painter(canvaso, listener),
 			msgInput = contextElm.find(".msginput"),
 			cp = colorpicker(contextElm.find(".color-canvas").get(0)),
-			painters = {};
+			painters = {},
+			messages = {};
 
 		function setOn(button){
 			contextElm.find('button.on').removeClass("on");
@@ -20,7 +21,7 @@ function canvasControl(painter, colorpicker, $) {
 
 		//New
 		contextElm.find('button.new').click( function (e){
-			myPainter.clear();
+			listener.onClear();
 		});
 
 		//Brush click
@@ -73,9 +74,15 @@ function canvasControl(painter, colorpicker, $) {
 		}
 
 		function onMessage(data){
+			var html = ss.tmpl['chat-message'].render({message: data.msg});
 			var chatBubble = contextElm.find('.users [data-id="'+data.userId+'"]');
-			chatBubble.find(".text").text(data.msg);
-			chatBubble.fadeIn().delay(7000).fadeOut();
+			chatBubble.show();
+			$(html).hide().appendTo(chatBubble).slideDown().delay(7000).slideUp(function(){
+				$(this).remove();
+				if(chatBubble.find(".message").length===0){
+					chatBubble.fadeOut();
+				}
+			});
 		}
 
 		return {
@@ -84,7 +91,10 @@ function canvasControl(painter, colorpicker, $) {
 			addUsers : function(users){
 				users.forEach(addUser);
 			},
-			onMessage: onMessage
+			onMessage: onMessage,
+			onClear: function (data){
+				myPainter.clear();
+			}
 		};
 
 	};
