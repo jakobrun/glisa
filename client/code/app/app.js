@@ -29,6 +29,9 @@ function userInit(user) {
   };
 
   user.addFriend = function (friend) {
+    if(!user.friends){
+      user.friends = [];
+    }
     user.friends.push(friend);
   };
 
