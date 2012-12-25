@@ -7,7 +7,7 @@ ss.rpc('user.init', '', function(user) {
   if(user) {
     userInit(user);
   } else {
-    $('#content').hide().html(ss.tmpl['login'].render()).slideDown();
+    $('#content').html(ss.tmpl['login'].render());
   }
 });
 
