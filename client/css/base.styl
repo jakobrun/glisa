@@ -1,0 +1,38 @@
+$pad = 10px
+$rad = 5px
+$page-with = 970px
+$color = #333
+$bg-color = #eee
+$popup-bg-color = #fff
+$complementary-color = #f66
+
+
+body
+  font normal 22px sans-serif
+  background: $bg-color
+  overflow-x: hidden
+  padding: 0 $pad
+p
+  margin-bottom 1em
+
+a
+  color #000a68
+
+h1
+  font-family: 'Flavors', cursive;
+  font-size 40px
+  font-weight normal
+  color $color
+
+input
+  font normal 22px sans-serif
+  border-radius: 15px
+  padding: 4px 6px
+  border: 1px solid #ccc
+
+
+box($shadow)
+  box-shadow 0 0 $shadow darken($bg-color,20%)
+  border-radius $rad
+  border: 1px solid darken($bg-color,10%)
+

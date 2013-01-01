@@ -1,0 +1,64 @@
+.is-canvas .toolbar
+    display: block;
+
+.toolbar
+  display: none;
+  button,
+  .button
+    font-size 42px
+    font-family: "Pictos Custom", sans-serif
+    text-decoration none
+    cursor pointer
+    display inline-block
+    height 42px
+    width 42px
+    border-radius: $rad
+    background-color: lighten($bg-color,20%)
+    border: 1px solid $bg-color
+    &:hover
+      border 1px solid #666
+      color red
+    &:before
+      content: attr(data-icon)
+    
+  .button
+    position: relative
+    z-index: 9999
+    &:hover
+      .color-canvas
+        visibility: visible
+  
+  .on
+    border: 1px solid darken($bg-color,10%)
+    background-color: $bg-color
+
+.line-width
+  display: none
+
+.colorsel
+  display: block
+  margin: 2px
+  border-radius: 5px
+  width: 38px
+  height: 38px
+
+.color-canvas
+  position: absolute
+  top: 24px
+  right: -90px
+  visibility: hidden
+  overflow: hidden
+  height: 256px
+  box $rad
+
+#bt-header
+  display: block
+  width: 100%
+  text-align: center
+  text-decoration: none
+  font-size: 30px
+  border-top: 1px solid darken($bg-color,10%)
+  background: linear-gradient(top, darken($bg-color,5%), $bg-color, darken($bg-color,20%));
+@media all and (min-width: 600px)
+  #bt-header
+    display: none
