@@ -31,6 +31,22 @@ function colorPicker(util, Image) {
  
 			canvas.addEventListener("mousemove", getColor, false);
 
+			canvas.addEventListener("touchstart", function(evt){
+				mouseDown = true;
+				evt.preventDefault();
+				getColor(evt.touches[0]);
+			}, false);
+
+			canvas.addEventListener("touchmove", function(evt){
+				evt.preventDefault();
+				getColor(evt.touches[0]);
+			}, false);
+
+			canvas.addEventListener("touchend", function(evt){
+				evt.preventDefault();
+				mouseDown = false;
+			}, false);
+
 			function getColor(evt){
 				var mousePos = util.getMousePos(canvas, evt);
 				var color;

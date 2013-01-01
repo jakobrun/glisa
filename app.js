@@ -2,7 +2,7 @@
 
 var http = require('http'),
     ss = require('socketstream'),
-    auth = require('./auth'),
+    auth = require( ss.env === 'production' ?'./auth':'./authDev'),
     User = require('./model').User,
     log = console.log;
 

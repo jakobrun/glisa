@@ -1,8 +1,23 @@
-<ul class="tabs">
-    <li><a href="#friendlist" class="tab active">Friends</a></li>
-</ul>
-<div class="friends" id="friendlist">
-    <div id="friends">
-    	{{> users}}
+<div class="toppanel">
+	<nav class ="tabs">
+		<ul>
+		    <li><a href="#friends" class="tab active">Friends</a></li>
+		</ul>
+		<a href="#" class="menu">Menu</a>
+	</nav>
+    <div class="toolbar">
+        <button class="new" data-icon="n"></button>
+        <button class="on brush" data-icon="b"></button>
+        <button class="rect" data-icon="r"></button>
+        <button class="line" data-icon="l"></button>
+        <div class="button">
+            <i class="colorsel" id="colorsel"></i>
+            <div class="color-canvas">
+                 <canvas width="256" height="256"></canvas>
+            </div>
+        </div>
+        <div class="line-width">
+            <input type="range" min="1" max="60" value="1">
+        </div>
     </div>
 </div>

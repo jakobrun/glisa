@@ -15,6 +15,10 @@ User.logAllOut = function(cb){
 	c.user.update({'online': true}, {$set : {'online': false}},{multi: true}, cb);
 };
 
+User.findAll = function(cb){
+	c.user.find(cb);
+};
+
 User.findOne = function(){
 	if(arguments.length===2){
 		c.user.findOne(arguments[0], arguments[1]);

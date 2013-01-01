@@ -46,7 +46,8 @@ function userInit(user) {
   $('#searchblock').html(ss.tmpl['search'].render());
 
  //Show friends
-  var html = ss.tmpl['tabs'].render({
+ $('#header').append(ss.tmpl['tabs'].render());
+  var html = ss.tmpl['friends'].render({
     users: user.friends,
     buttons: function() {
       return getButtons(this);
@@ -56,6 +57,11 @@ function userInit(user) {
     users: ss.tmpl['users']
   });
   $('#content').html(html);
+
+  //Toggle header
+  $('#bt-header').click( function(){
+    $('#body').toggleClass('is-header-closed');
+  });
 
   //Update online status
   ss.event.on('user-online-status', function (data) {
@@ -125,7 +131,7 @@ function userInit(user) {
   });
 
   //Confirm friend
-  $('button.confirm').live('click', function (){
+  $('button.bt-confirm').live('click', function (){
     var userElm = $(this).closest('li'),
       id = userElm.attr('data-id'),
       friend = user.findFriendById(id);
@@ -146,7 +152,7 @@ function userInit(user) {
   });
 
   //Remove friend
-  $('button.remove').live('click', function() {
+  $('button.bt-remove').live('click', function() {
     if(!confirm("Are you shure?"))
       return 0;
     var userElm = $(this).closest('li'),
@@ -160,11 +166,15 @@ function userInit(user) {
       $('#friends [data-id="'+friend._id+'"]').remove();
   });
 
- 
-  var myTabs = tabs($('#content'));
+ //Create tabs and canvas state to body if canvastab is selected
+  var myTabs = tabs($('#body'),{
+    onTabSelected : function(event){
+      $('body').toggleClass('is-canvas',event.index>0);
+    }
+  });
 
   //Start chat
-  $('button.chat').live('click', function() {
+  $('button.bt-chat').live('click', function() {
     var id = $(this).closest('li').attr('data-id'),
       friend = user.findFriendById(id);
     ss.rpc('chat.newChat', {_id: id});
@@ -220,14 +230,14 @@ function userInit(user) {
 
 //Buttons
 var btFriendRequest = {
-  classname: 'confirm',
+  classname: 'bt-confirm',
   label: 'Confirm'
 },
   btFriend = [{
-    classname: 'chat',
+    classname: 'bt-chat',
     label: 'Chat'
   }, {
-    classname: 'remove',
+    classname: 'bt-remove',
     icon: 'x'
   }];
 

@@ -4,16 +4,13 @@ function painter(document, util) {
 	'use strict';
 
 		//Painter
-	return function (canvaso, listener) {
+	return function (canvaso, toolsCtrl, listener) {
 		var contexto = canvaso.getContext("2d"),
-			canvas = document.createElement("canvas"),
-			// Set the pencil tool default.
-			currenttool = 'brush',
-			currentColor = '#000',
-			currentLineWidth = 1;
+			canvas = document.createElement("canvas");
 
 		//Add feedback canvas to dom
 		canvas.className = "temp-canvas";
+		canvas.tabindex = 0;
 		canvas.width = canvaso.width;
 		canvas.height = canvaso.height;
 		canvaso.parentNode.appendChild(canvas);
@@ -24,15 +21,41 @@ function painter(document, util) {
 		context.lineCap = 'round';
 
 		// Attach the mousedown, mousemove and mouseup event listeners.
-		canvas.addEventListener('mousedown', ev_canvas, false);
-		canvas.addEventListener('mousemove', ev_canvas, false);
-		canvas.addEventListener('mouseup',   ev_canvas, false);
+		canvas.addEventListener('touchstart', ev_canvas, false);
+		canvas.addEventListener('touchmove', ev_canvas, false);
+		canvas.addEventListener('touchend',   simpleEventOnCanvas, false);
+		canvas.addEventListener('mousedown',   simpleEventOnCanvas, false);
+		canvas.addEventListener('mousemove',   simpleEventOnCanvas, false);
+		canvas.addEventListener('mouseup',   simpleEventOnCanvas, false);
 
 		function createTools(ctx,subCanvas){
 			// This painting tool works like a drawing pencil which tracks the mouse
 			// movements.
 			function ToolPencil () {
 				var tool = this;
+
+				// This is called when you start holding down the mouse button.
+				// This starts the pencil drawing.
+				this.touchstart = function (ev, scope) {
+					ctx.beginPath();
+					ctx.moveTo(ev._x, ev._y);
+					return true;
+				};
+
+				// This function is called every time you move the mouse. Obviously, it only
+				// draws if the tool.started state is set to true (when you are holding down
+				// the mouse button).
+				this.touchmove = function (ev, scope) {
+					ctx.lineTo(ev._x, ev._y);
+					ctx.stroke();
+					return true;
+				};
+
+				// This is called when you release the mouse button.
+				this.touchend = function (ev, scope) {
+					img_update();
+					return true;
+				};
 
 				// This is called when you start holding down the mouse button.
 				// This starts the pencil drawing.
@@ -168,22 +191,34 @@ function painter(document, util) {
 		// The general-purpose event handler. This function just determines the mouse
 		// position relative to the canvas element.
 		function ev_canvas (ev) {
+			ev.preventDefault();
+			for(var i=0;i<ev.touches.length;i++){
+				var tev = ev.touches[i];
+				singleEvent(tev,ev.type);
+			}
+		}
+
+		function simpleEventOnCanvas(ev){
+			singleEvent(ev,ev.type);
+		}
+
+		function singleEvent (ev, type) {
 			var offset = util.getPageOffset(canvas);
 			ev._x = ev.pageX - offset.x;
 			ev._y = ev.pageY - offset.y;
 
 			// Call the event handler of the tool.
-			var tool = tools[currenttool],
-				func = tool[ev.type];
+			var tool = tools[toolsCtrl.getTool()],
+				func = tool[type];
 			if (func) {
-				context.strokeStyle = currentColor;
-				context.lineWidth = currentLineWidth;
-				var sEvent = {type: ev.type,
+				context.strokeStyle = toolsCtrl.getColor();
+				context.lineWidth = toolsCtrl.getLineWidth();
+				var sEvent = {type: type,
 					_x: ev._x,
 					_y: ev._y,
-					tool: currenttool,
-					color: currentColor,
-					lineWidth: currentLineWidth};
+					tool: toolsCtrl.getTool(),
+					color: toolsCtrl.getColor(),
+					lineWidth: toolsCtrl.getLineWidth()};
 				if(func(ev, tool)){
 					if(listener.onPaint)
 						listener.onPaint(sEvent);
@@ -192,15 +227,6 @@ function painter(document, util) {
 		}
 
 		return {
-			setTool : function(tool){
-				currenttool = tool;
-			},
-			setColor : function(color){
-				currentColor = color;
-			},
-			setLineWidth : function(lineWidth){
-				currentLineWidth = lineWidth;
-			},
 			clear : function(){
 				contexto.clearRect(0, 0, canvas.width, canvas.height);
 			},

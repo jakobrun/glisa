@@ -1,8 +1,9 @@
 function tabs($) {
 	'use strict';
-	return function(content){
-		var tabs = content.find('ul.tabs'),
+	return function(content, listener){
+		var tabs = content.find('.tabs ul'),
 			links = content.find('a.tab'),
+			menuLink = content.find('.menu'),
 			tabList = [],
 			active;
 
@@ -19,16 +20,26 @@ function tabs($) {
 				active = tab;
 			}
 		});
+		if(content.find('.menu:visible').length>0){
+			tabs.hide();
+		}
+
+		menuLink.click( function (){
+			tabs.slideToggle();
+		});
 
 		function initTab(link, body, closelink){
 			var tab =	{link: link,
 							body: body,
 							show: function(){
 								active.link.removeClass('active');
-								active.body.slideUp();
+								active.body.hide();
 								link.addClass('active');
-								body.slideDown();
+								body.show();
 								active = tab;
+								if(listener){
+									listener.onTabSelected({tab: tab,index: tabList.indexOf(tab)});
+								}
 							},
 							close: function(){
 								var index = tabList.indexOf(tab);
@@ -43,7 +54,7 @@ function tabs($) {
 							}
 						};
 
-			link.click( function(){
+			link.click( function(e){
 				tab.show();
 			});
 			if(closelink){
@@ -57,12 +68,12 @@ function tabs($) {
 		}
 
 		function addTab(id, title, html){
-			var link = $('<a/>',{href: '#'+id}).text(title),
+			var link = $('<a/>',{href: '#'+id}).addClass('tab').text(title),
 				closelink = $('<a/>',{href: '#'+id}).addClass('icons-closetab').attr('data-icon','x'),
 				li = $('<li/>'),
 				body = $(html);
 
-			li.append(link).append(closelink);
+			li.append(closelink).append(link);
 			tabs.append(li);
 			link.attr('href','#'+id).text(title);
 			content.append(body);

@@ -2,22 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
+    <!-- Define a viewport to mobile devices to use - telling the browser to assume that the page is as wide as the device (width=device-width) and setting the initial page zoom level to be 1 (initial-scale=1.0) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable = no" />
     <SocketStream/>
     <link href='http://fonts.googleapis.com/css?family=Flavors' rel='stylesheet' type='text/css'>
     <link href="//get.pictos.cc/fonts/2999/2" rel="stylesheet" type="text/css">
     <title>Glisa</title>
   </head>
-  <body>
-    <div class="wrapper">
-      <header>
+  <body id="body">
+    <header>
+        <div id="header">
           <h1>Glisa</h1>
           <div id="searchblock" class="search">
           </div>
           <div id="user"></div>
-
-      </header>
-      <div id="content">
-      </div>
+        </div>
+      <a href="#" id="bt-header">...</a>
+    </header>
+    <div id="content">
     </div>
   </body>
 </html>

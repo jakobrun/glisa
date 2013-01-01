@@ -1,22 +1,8 @@
 <div class="canvas-content" id="{{id}}">
-    <div class="toolbar">
-        <button class="new" data-icon="n"></button>
-        <button class="on brush" data-icon="b"></button>
-        <button class="rect" data-icon="r"></button>
-        <button class="line" data-icon="l"></button>
-        <div class="button">
-            <i class="colorsel" id="colorsel"></i>
-             <canvas class="color-canvas" width="256" height="256"></canvas>
-        </div>
-        <div class="line-width">
-            <input type="range" min="1" max="60" value="1">
-        </div>
-    </div>
     <div class="main">
-        <canvas class="canvas" width="970" height="600"></canvas>
-        <input type="text" class="msginput" placeholder="new message..."/>
-        <div class="users">
-            <ul>
+        <canvas class="canvas"></canvas>
+        <div class="chat">
+            <ul class="users">
                 {{#users}}
                     <li>
                         <div class="user-pic">
@@ -30,6 +16,7 @@
                     </li>
                 {{/users}}
             </ul>
+            <input type="text" class="msginput" placeholder="new message..."/>
         </div>
     </div>
    
