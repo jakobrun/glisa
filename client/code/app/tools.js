@@ -17,8 +17,8 @@ function tools (contextElm, $) {
 
 	//New
 	contextElm.find('button.new').click( function (e){
-		if(listener){
-			listener.onClear();			
+		if(listener && confirm('New canvas?')){
+			listener.onClear();
 		}
 	});
 
