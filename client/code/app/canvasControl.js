@@ -56,11 +56,6 @@ function canvasControl($) {
 			});
 		}
 
-		var toolListener = {
-			onClear: function (data){
-				myPainter.clear();
-			}
-		};
 		return {
 			paint : paint,
 			addUser : addUser,
@@ -69,7 +64,10 @@ function canvasControl($) {
 			},
 			onMessage: onMessage,
 			onSelected: function(event){
-				toolsCtrl.setListener(toolListener);
+				toolsCtrl.setListener(listener);
+			},
+			onClear : function(){
+				myPainter.clear();
 			}
 		};
 
