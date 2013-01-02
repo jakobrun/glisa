@@ -34,7 +34,6 @@ function painter(document, util) {
 			function ToolPencil () {
 				var tool = this;
 
-				// This is called when you start holding down the mouse button.
 				// This starts the pencil drawing.
 				this.touchstart = function (ev, scope) {
 					ctx.beginPath();
@@ -42,16 +41,14 @@ function painter(document, util) {
 					return true;
 				};
 
-				// This function is called every time you move the mouse. Obviously, it only
-				// draws if the tool.started state is set to true (when you are holding down
-				// the mouse button).
+				// draw
 				this.touchmove = function (ev, scope) {
 					ctx.lineTo(ev._x, ev._y);
 					ctx.stroke();
 					return true;
 				};
 
-				// This is called when you release the mouse button.
+				// End draw
 				this.touchend = function (ev, scope) {
 					img_update();
 					return true;
@@ -94,6 +91,36 @@ function painter(document, util) {
 			function ToolRect() {
 				var tool = this;
 
+				// This starts the pencil drawing.
+				this.touchstart = function (ev, scope) {
+					scope.x0 = ev._x;
+					scope.y0 = ev._y;
+					return true;
+				};
+
+				// draw
+				this.touchmove = function (ev, scope) {
+					var x = Math.min(ev._x,  scope.x0),
+						y = Math.min(ev._y,  scope.y0),
+						w = Math.abs(ev._x - scope.x0),
+						h = Math.abs(ev._y - scope.y0);
+
+					clear();
+
+					if (!w || !h) {
+						return false;
+					}
+
+					ctx.strokeRect(x, y, w, h);
+					return true;
+				};
+
+				// End draw
+				this.touchend = function (ev, scope) {
+					img_update();
+					return true;
+				};
+
 				this.mousedown = function (ev, scope) {
 					scope.started = true;
 					scope.x0 = ev._x;
@@ -105,20 +132,7 @@ function painter(document, util) {
 					if (!scope.started) {
 						return false;
 					}
-
-					var x = Math.min(ev._x,  scope.x0),
-						y = Math.min(ev._y,  scope.y0),
-						w = Math.abs(ev._x - scope.x0),
-						h = Math.abs(ev._y - scope.y0);
-
-					clear();
-
-					if (!w || !h) {
-						return;
-					}
-
-					ctx.strokeRect(x, y, w, h);
-					return true;
+					return tool.touchmove(ev,scope);
 				};
 
 				this.mouseup = function (ev, scope) {
@@ -137,6 +151,31 @@ function painter(document, util) {
 				var tool = this;
 				this.started = false;
 
+				// This starts the pencil drawing.
+				this.touchstart = function (ev, scope) {
+					scope.x0 = ev._x;
+					scope.y0 = ev._y;
+					return true;
+				};
+
+				// draw
+				this.touchmove = function (ev, scope) {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+					ctx.beginPath();
+					ctx.moveTo(scope.x0, scope.y0);
+					ctx.lineTo(ev._x,   ev._y);
+					ctx.stroke();
+					ctx.closePath();
+
+					return true;
+				};
+
+				// End draw
+				this.touchend = function (ev, scope) {
+					img_update();
+					return true;
+				};
 				this.mousedown = function (ev, scope) {
 					scope.started = true;
 					scope.x0 = ev._x;
@@ -148,16 +187,7 @@ function painter(document, util) {
 					if (!scope.started) {
 						return false;
 					}
-
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-					ctx.beginPath();
-					ctx.moveTo(scope.x0, scope.y0);
-					ctx.lineTo(ev._x,   ev._y);
-					ctx.stroke();
-					ctx.closePath();
-
-					return true;
+					tool.touchmove(ev, scope);
 				};
 
 				this.mouseup = function (ev, scope) {

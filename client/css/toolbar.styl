@@ -51,14 +51,15 @@
   height: 256px
   box $rad
 
-#bt-header
+#bt-header, .bt-chat-toggler
   display: block
   width: 100%
   text-align: center
   text-decoration: none
   font-size: 30px
+  color: darken($bg-color,30%)
   border-top: 1px solid darken($bg-color,10%)
   background: linear-gradient(top, darken($bg-color,5%), $bg-color, darken($bg-color,20%));
 @media all and (min-width: 600px)
-  #bt-header
+  #bt-header, .bt-chat-toggler
     display: none

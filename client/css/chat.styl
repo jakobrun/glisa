@@ -1,15 +1,19 @@
 .chat
   position: fixed
-  padding: $pad
-  bottom: -140px
+  bottom: -160px
   right: 0
   left: 0
   background-color: $bg-color
   opacity: 0.8
   z-index: 1000
   transition: all 0.5s
-  &:hover
-    bottom: 0px
+.main .is-chat-open
+  bottom: 0
+@media (min-width: 600px)
+  .chat
+    bottom: -145px
+    &:hover
+      bottom: 0px
 
 .msginput
   min-width: 95%

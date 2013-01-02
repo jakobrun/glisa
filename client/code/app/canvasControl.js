@@ -19,6 +19,10 @@ function canvasControl($) {
 			painters = {},
 			messages = {};
 
+		//Toggle chat
+		contextElm.find(".bt-chat-toggler").click(function(){
+			contextElm.find('.chat').toggleClass('is-chat-open');
+		});
 
 		//Send message
 		msgInput.keyup(function(e){
