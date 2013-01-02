@@ -4,6 +4,7 @@ function tabs($) {
 		var tabs = content.find('.tabs ul'),
 			links = content.find('a.tab'),
 			menuLink = content.find('.menu'),
+			bodyContainter = content.find('#content'),
 			tabList = [],
 			active;
 
@@ -14,7 +15,7 @@ function tabs($) {
 				body = $('#'+id),
 				tab  = initTab(link, body);
 
-			if(!link.hasClass('active')){
+			if(!link.parent().hasClass('active')){
 				body.hide();
 			} else {
 				active = tab;
@@ -32,9 +33,9 @@ function tabs($) {
 			var tab =	{link: link,
 							body: body,
 							show: function(){
-								active.link.removeClass('active');
+								active.link.parent().removeClass('active');
 								active.body.hide();
-								link.addClass('active');
+								link.parent().addClass('active');
 								body.show();
 								active = tab;
 								if(listener){
@@ -45,12 +46,18 @@ function tabs($) {
 								var index = tabList.indexOf(tab);
 								tabList.splice(index,1);
 								if(tab===active){
-									if(index>=tabList.length) index = tabList.length-1;
+									var i = index;
+									if(i>=tabList.length) i = tabList.length-1;
 
-									tabList[index].show();
+									tabList[i].show();
 								}
-								link.parent().remove();
+								link.parent().slideUp(function(){
+									link.parent().remove();
+								});
 								body.remove();
+								if(listener){
+									listener.onTabRemoved({tab: tab, index: index});
+								}
 							}
 						};
 
@@ -76,7 +83,7 @@ function tabs($) {
 			li.append(closelink).append(link);
 			tabs.append(li);
 			link.attr('href','#'+id).text(title);
-			content.append(body);
+			bodyContainter.append(body);
 			body.hide();
 			return initTab(link, body, closelink);
 		}

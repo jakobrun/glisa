@@ -14,7 +14,8 @@ function canvasControl($) {
 
 
 		var	colorbutton = contextElm.find(".colorsel"),
-			myPainter = painter(canvaso, tools(), listener),
+			toolsCtrl = tools(),
+			myPainter = painter(canvaso, toolsCtrl, listener),
 			msgInput = contextElm.find(".msginput"),
 			painters = {},
 			messages = {};
@@ -55,6 +56,11 @@ function canvasControl($) {
 			});
 		}
 
+		var toolListener = {
+			onClear: function (data){
+				myPainter.clear();
+			}
+		};
 		return {
 			paint : paint,
 			addUser : addUser,
@@ -62,8 +68,8 @@ function canvasControl($) {
 				users.forEach(addUser);
 			},
 			onMessage: onMessage,
-			onClear: function (data){
-				myPainter.clear();
+			onSelected: function(event){
+				toolsCtrl.setListener(toolListener);
 			}
 		};
 

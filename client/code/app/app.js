@@ -16,7 +16,8 @@ $(window).unload(function(){
 });
 
 function userInit(user) {
-  var cavasControlsById = {};
+  var cavasControlsById = {},
+      canvasControls = [];
 
   //tick
   ss.rpc('user.tick');
@@ -170,6 +171,18 @@ function userInit(user) {
   var myTabs = tabs($('#body'),{
     onTabSelected : function(event){
       $('body').toggleClass('is-canvas',event.index>0);
+      if(event.index>0)
+        canvasControls[event.index-1].onSelected(event);
+    },
+    onTabRemoved : function(event){
+      var cc = canvasControls[event.index-1];
+      canvasControls.splice(event.index-1,1);
+      for(c in cavasControlsById){
+        if(cavasControlsById[c]===cc){
+          delete cavasControlsById[c];
+          break;
+        }
+      }
     }
   });
 
@@ -183,7 +196,6 @@ function userInit(user) {
   function createChatTab(data){
     var friend = _.find(data.users, function(u){ return u._id!=user._id;});
     var tab = myTabs.addTab(data.id, friend? friend.name : 'Not logged in', ss.tmpl['canvas'].render({id: data.id, users: data.users}));
-    tab.show();
     var cc = canvasControl(tab.body, ss, {
       onPaint: function (event){
         event.id = data.id;
@@ -198,6 +210,8 @@ function userInit(user) {
     });
     cc.addUsers(data.users);
     cavasControlsById[data.id] = cc;
+    canvasControls.push(cc);
+    tab.show();
   }
   //Chat created
   ss.event.on('chat-created', createChatTab);

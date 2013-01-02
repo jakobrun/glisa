@@ -1,25 +1,27 @@
 .icons-closetab
   font-family: "Pictos Custom", sans-serif
   font-size: 30px
-  padding-top: 6px
+  padding-top: 10px
   color: #000
-  visibility: hidden
   text-decoration none
   &:before
     content: attr(data-icon)
 .tabs
+  margin-left: $pad
   .tab, .menu
     padding: 10px
     text-decoration none
   .active
-    color: $complementary-color
+    background-color: #fff
+    a
+      color: $complementary-color
   .icons-closetab
     float: right
   li:hover a.icons-closetab
     visibility: visible
 
 
-@media all and (max-width: 599px)
+@media (max-width: 599px)
   .tabs
     .tab, .menu
       display: block
@@ -30,7 +32,9 @@
       background-color: $bg-color
 
 
-@media all and (min-width: 600px)
+@media (min-width: 600px)
+  .icons-closetab
+    visibility: hidden
   .tabs
     overflow: hidden
     li

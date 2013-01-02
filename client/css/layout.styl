@@ -1,15 +1,19 @@
 header
-	border-bottom 2px solid darken($bg-color,30%)
-.is-canvas header
 	transition: all 0.5s
+	border-bottom 2px solid darken($bg-color,30%)
 	position: fixed
-	top: -50px
+	top: 0
 	right: 0
 	left: 0
 	z-index: 9999
-	opacity: 0.8
+	opacity: 1
 	background-color: $bg-color
+.is-canvas header
+	top: -50px
+	opacity: 0.8
 .is-header-closed header
-		top: -150px	
-header, .main
+	top: -150px
+.main
 	position: relative
+.home
+	margin-top: 100px

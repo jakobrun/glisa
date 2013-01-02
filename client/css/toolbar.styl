@@ -1,8 +1,12 @@
 .is-canvas .toolbar
-    display: block;
+    max-height: 70px
+    overflow: visible
 
 .toolbar
-  display: none;
+  max-height: 0
+  transition: all 0.5s
+  overflow: hidden
+  margin-left: $pad
   button,
   .button
     font-size 42px
@@ -17,7 +21,7 @@
     border: 1px solid $bg-color
     &:hover
       border 1px solid #666
-      color red
+      color lighten($complementary-color,20%)
     &:before
       content: attr(data-icon)
     
@@ -30,7 +34,8 @@
   
   .on
     border: 1px solid darken($bg-color,10%)
-    background-color: $bg-color
+    background-color: #fff
+    color $complementary-color
 
 .line-width
   display: none
@@ -44,8 +49,8 @@
 
 .color-canvas
   position: absolute
-  top: 24px
-  right: -90px
+  top: 42px
+  right: -30px
   visibility: hidden
   overflow: hidden
   height: 256px
