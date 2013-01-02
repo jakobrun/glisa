@@ -1,7 +1,7 @@
 var colorpicker = require("./colorpicker"),
 	_inst;
 
-function tools (contextElm, $) {
+function tools (contextElm, win, $) {
 	'use strict';
 
 	var		currenttool = 'brush',
@@ -17,7 +17,7 @@ function tools (contextElm, $) {
 
 	//New
 	contextElm.find('button.new').click( function (e){
-		if(listener && confirm('New canvas?')){
+		if(listener && win.confirm('New canvas?')){
 			listener.onClear();
 		}
 	});
@@ -69,6 +69,6 @@ function tools (contextElm, $) {
 	};
 }
 module.exports = function(){
-	_inst = _inst || tools($('.toolbar'),$);
+	_inst = _inst || tools($('.toolbar'),window,$);
 	return _inst;
 };
