@@ -51,9 +51,11 @@ function tabs($) {
 
 									tabList[i].show();
 								}
-								link.parent().slideUp(function(){
+								link.parent().addClass("is-tab-closed");
+								closelink.remove();
+								setTimeout(function(){
 									link.parent().remove();
-								});
+								},500);
 								body.remove();
 								if(listener){
 									listener.onTabRemoved({tab: tab, index: index});

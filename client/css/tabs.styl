@@ -20,17 +20,23 @@
   li:hover a.icons-closetab
     visibility: visible
 
-
 @media (max-width: 599px)
   .tabs
+    li
+      max-height: 250px
+      overflow: hidden
+      transition: all .5s  
+      white-space: nowrap
+    .is-tab-closed
+      max-height: 0
+
     .tab, .menu
       display: block
-      width: 100%
       background-color: #fff
       border-bottom: 1px solid $color
+      width: 100%
     .menu
       background-color: $bg-color
-
 
 @media (min-width: 600px)
   .icons-closetab
@@ -38,13 +44,19 @@
   .tabs
     overflow: hidden
     li
+      white-space: nowrap
       border-radius: 30px
       border: 1px solid #ccc
       float: left
       margin-right: $pad
+      max-width: 250px
+      transition: all .5s  
+      overflow: hidden
       .tab
         float: left
         margin-right: $pad
+    .is-tab-closed
+      max-width: 0
 
   .menu
     display: none;
