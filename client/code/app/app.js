@@ -114,7 +114,7 @@ function userInit(user) {
 
   //Paint
   ss.event.on('paint', function(data) {
-    if(user.userId === user._id) {
+    if(data.userId === user._id) {
       return 0;
     }
     var cc = cavasControlsById[data.id];
