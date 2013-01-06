@@ -1,6 +1,7 @@
 var friends = require('./friends'),
   tabs = require('./tabs'),
   _ = require('underscore'),
+  streamOrder = require('./streamOrder');
   canvasControl = require('./canvasControl');
 
 ss.rpc('user.init', '', function(user) {
@@ -18,7 +19,11 @@ $(window).unload(function() {
 
 function userInit(user) {
   var cavasControlsById = {},
-    canvasControls = [];
+    canvasControls = [],
+    paintPipe = streamOrder(function(data){
+      var cc = cavasControlsById[data.id];
+      cc.paint(data);
+    });
 
   //tick
   ss.rpc('user.tick');
@@ -117,8 +122,8 @@ function userInit(user) {
     if(data.userId === user._id) {
       return 0;
     }
-    var cc = cavasControlsById[data.id];
-    cc.paint(data);
+    paintPipe(data);
+
   });
 
   //Clear

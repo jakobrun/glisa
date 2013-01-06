@@ -1,19 +1,8 @@
 var config  = require('../config'),
-	time = require('../time'),
-	async = require('async'),
-	currentTime = 0,
-	currentTimeoutFunc,
-	currentTimeout;
+	timeMock = require('./timeMock'),
+	async = require('async');
+
 config.mongo.connectionString = 'testglisa';
-
-time.now = function(){
-	return currentTime;
-};
-
-time.setTimeout = function(cb, time){
-	currentTimeoutFunc = cb;
-	currentTimeout = time;
-};
 
 var User = require('../model').User,
 	_    =  require('underscore');
@@ -52,20 +41,20 @@ describe('model', function () {
 		});
 	
 		it('should set onlinetime to current time', function(done){
-			currentTime = 100;
+			timeMock.currentTime = 100;
 			User.tick(user, function(err, user){
-				user.onlinetime.should.equal(currentTime);
+				user.onlinetime.should.equal(timeMock.currentTime);
 				done();
 			});
 		});
 
 		it('should logout if timeout', function(done){
-			currentTime = 100;
+			timeMock.currentTime = 100;
 			User.tick(user, function(err, user){
-				currentTimeout.should.equal(30000);
-				currentTime = currentTimeout;
-				currentTimeoutFunc();
-				setTimeout(function(){
+				timeMock.currentTimeout.should.equal(30000);
+				timeMock.currentTime = timeMock.currentTimeout;
+				timeMock.currentTimeoutFunc();
+				timeMock.setTimeout(function(){
 					User.findById(user._id.toString(), function(err, user){
 						user.online.should.be.false;
 						done();

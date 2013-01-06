@@ -2,7 +2,6 @@
 var mongojs = require('mongojs'),
 	async = require('async'),
 	config = require('./config'),
-	time = require('./time'),
 	_ = require('underscore'),
 	c = mongojs.connect(config.mongo.connectionString,['user']);
 'use strict';
@@ -52,14 +51,14 @@ User.logout = function(user, cb){
 };
 
 User.tick = function(user, cb, tcb) {
-	user.onlinetime = time.now();
+	user.onlinetime = Date.now();
 	c.user.update({_id: user._id}, { $set: {onlinetime: user.onlinetime}}, function(err){
 		if(cb)
 			cb(err, user);
 	});
-	time.setTimeout( function(){
+	setTimeout( function(){
 		User.findById(user._id.toString(), function(err, user){
-			var diff = time.now() - (user? user.onlinetime: 0);
+			var diff = Date.now() - (user? user.onlinetime: 0);
 			if(diff > 28000){
 				User.logout(user,tcb);
 			}

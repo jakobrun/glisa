@@ -246,6 +246,7 @@ function painter(document, util) {
 				var sEvent = {type: type,
 					_x: ev._x,
 					_y: ev._y,
+					time: Date.now(),
 					tool: toolsCtrl.getTool(),
 					color: toolsCtrl.getColor(),
 					lineWidth: toolsCtrl.getLineWidth()};
