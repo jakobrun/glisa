@@ -17,13 +17,19 @@ function canvasControl($) {
 			toolsCtrl = tools(),
 			myPainter = painter(canvaso, toolsCtrl, listener),
 			msgInput = contextElm.find(".msginput"),
+			chat = contextElm.find('.chat'),
 			painters = {},
 			messages = {};
 
 		//Toggle chat
-		contextElm.find(".bt-chat-toggler").click(function(){
-			contextElm.find('.chat').toggleClass('is-chat-open');
-		});
+		function toggleChat(e){
+			chat.toggleClass('is-chat-open');
+			e.preventDefault();
+			e.stopPropagation();
+		}
+		var toggleChatButton = contextElm.find(".bt-chat-toggler");
+		//toggleChatButton.bind('click', toggleChat);
+		toggleChatButton.bind('touchend',toggleChat);
 
 		//Send message
 		msgInput.keyup(function(e){

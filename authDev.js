@@ -3,7 +3,7 @@ var User = require('./model').User,
 
 function listUsers(req, res){
 	User.findAll(function(err, docs){
-		var html = "<html><head></head><body>";
+		var html = "<!doctype html><meta charset=UTF-8/><meta name=viewport content='width=device-width, initial-scale=1.0'/><title>Glisa</title>";
 		if(err){
 			html += err;
 		}else{
@@ -13,7 +13,6 @@ function listUsers(req, res){
 			});
 			html += "</ul>";
 		}
-		html += "</body></html>";
 		res.end(html);
 	});
 }
