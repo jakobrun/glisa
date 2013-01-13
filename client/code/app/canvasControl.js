@@ -1,25 +1,37 @@
 var painter = require("./painter"),
 	tools = require("./tools");
 
-function canvasControl($) {
+function canvasControl($,win) {
 	'use strict';
 
 		//Painter
 	return function (contextElm, ss, listener) {
-		var canvaso = contextElm.find("canvas.canvas").get(0);
-
-		canvaso.width = window.innerWidth;
-		canvaso.height = window.innerHeight;
-
-
-
-		var	colorbutton = contextElm.find(".colorsel"),
+		var canvaso = contextElm.find("canvas.canvas").get(0),
+			colorbutton = contextElm.find(".colorsel"),
 			toolsCtrl = tools(),
 			myPainter = painter(canvaso, toolsCtrl, listener),
 			msgInput = contextElm.find(".msginput"),
 			chat = contextElm.find('.chat'),
 			painters = {},
 			messages = {};
+
+		function setCanvasSize(e){
+			var ctx = canvaso.getContext("2d");
+			var img = ctx.getImageData(0, 0, canvaso.width, canvaso.height);
+			canvaso.width = win.innerWidth;
+			canvaso.height = win.innerHeight;
+			if(e)
+				ctx.putImageData(img,0,0);
+			myPainter.setCanvasSize(canvaso);
+			for(var p in painters){
+				painters[p].setCanvasSize(canvaso);
+			}
+		}
+
+		$(win).resize( setCanvasSize);
+		setCanvasSize();
+
+
 
 		//Toggle chat
 		function toggleChat(e){
@@ -80,4 +92,4 @@ function canvasControl($) {
 	};
 }
 
-module.exports = canvasControl($);
+module.exports = canvasControl($,window);

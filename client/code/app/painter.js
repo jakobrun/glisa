@@ -261,6 +261,10 @@ function painter(document, util) {
 			clear : function(){
 				contexto.clearRect(0, 0, canvas.width, canvas.height);
 			},
+			setCanvasSize: function(c){
+				canvas.width = c.width;
+				canvas.height = c.height;
+			},
 			socketPainter : function(){
 				var sCanvas = document.createElement("canvas");
 				//Add feedback canvas to dom
@@ -273,6 +277,10 @@ function painter(document, util) {
 				ctx.lineCap = 'round';
 
 				return {
+					setCanvasSize: function(c){
+						sCanvas.width = c.width;
+						sCanvas.height = c.height;
+					},
 					paint: function(sEvent){
 						var tool = tools[sEvent.tool],
 						func = tool[sEvent.type];
