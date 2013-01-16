@@ -5,7 +5,7 @@ function tools (contextElm, win, $) {
 	'use strict';
 
 	var		currenttool = 'brush',
-			currentColor = '#000',
+			currentColor = [0,0,0],
 			currentLineWidth = 1,
 			colorbutton = contextElm.find(".colorsel"),
 			listener;
@@ -43,7 +43,7 @@ function tools (contextElm, win, $) {
 	//Color picker
 	var cp = colorpicker(contextElm.find(".color-canvas canvas").get(0));
 	cp.onChange(function(color){
-		colorbutton.css('background-color',color);
+		colorbutton.css('background-color',"rgba("+color.join(",")+",1)");
 		currentColor = color;
 	});
 

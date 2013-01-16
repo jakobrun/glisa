@@ -49,7 +49,6 @@ function colorPicker(util, Image) {
 
 			function getColor(evt){
 				var mousePos = util.getMousePos(canvas, evt);
-				var color;
  
 				if (mouseDown &&
 					mousePos !== null &&
@@ -58,29 +57,25 @@ function colorPicker(util, Image) {
 					mousePos.y > padding &&
 					mousePos.y < padding + imageObj.height) {
 					/*
-					* color picker image is 256x256 and is offset by 10px
+					* color picker image is 256x256 and is offset by 0px
 					* from top and bottom
 					*/
-					var imageData = context.getImageData(padding, padding, imageObj.width, imageObj.width);
-					var data = imageData.data;
-					var x = mousePos.x - padding;
-					var y = mousePos.y - padding;
-					var red = data[((imageObj.width * y) + x) * 4];
-					var green = data[((imageObj.width * y) + x) * 4 + 1];
-					var blue = data[((imageObj.width * y) + x) * 4 + 2];
-					color = "rgb(" + red + "," + green + "," + blue + ")";
-				}
- 
-				if (color) {
-					drawColorSquare(canvas, color, imageObj);
+					var imageData = context.getImageData(padding, padding, imageObj.width, imageObj.width),
+						data = imageData.data,
+						x = mousePos.x - padding,
+						y = mousePos.y - padding,
+						color =[data[((imageObj.width * y) + x) * 4],/*Red*/
+								data[((imageObj.width * y) + x) * 4 + 1],/*Green*/
+								data[((imageObj.width * y) + x) * 4 + 2]/*blue*/];
+					setColor(color);
 				}
 			}
  
 			context.drawImage(imageObj, padding, padding);
-			drawColorSquare(canvas, "black", imageObj);
+			setColor([0,0,0]/*Black*/);
 		}
 
-		function drawColorSquare(canvas, color, imageObj){
+		function setColor(color){
 			if(listener)
 				listener(color);
 		}

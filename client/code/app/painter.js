@@ -1,6 +1,9 @@
-var util = require("./myutil");
+var util = require("./myutil"),
+	PencilTool = require("./tools/pencilTool"),
+	LineTool = require("./tools/lineTool"),
+	RectTool = require("./tools/rectTool");
 
-function painter(document, util) {
+function painter(document) {
 	'use strict';
 
 		//Painter
@@ -17,244 +20,103 @@ function painter(document, util) {
 
 		//Create context and tools
 		var context = canvas.getContext("2d"),
-			tools = createTools(context,canvas);
+			tools = createTools(context);
 		context.lineCap = 'round';
+		context.lineJoin = 'round';
 
-		// Attach the mousedown, mousemove and mouseup event listeners.
-		canvas.addEventListener('touchstart', ev_canvas, false);
-		canvas.addEventListener('touchmove', ev_canvas, false);
-		canvas.addEventListener('touchend',   simpleEventOnCanvas, false);
-		canvas.addEventListener('mousedown',   simpleEventOnCanvas, false);
-		canvas.addEventListener('mousemove',   simpleEventOnCanvas, false);
-		canvas.addEventListener('mouseup',   simpleEventOnCanvas, false);
-
-		function createTools(ctx,subCanvas){
-			// This painting tool works like a drawing pencil which tracks the mouse
-			// movements.
-			function ToolPencil () {
-				var tool = this;
-
-				// This starts the pencil drawing.
-				this.touchstart = function (ev, scope) {
-					ctx.beginPath();
-					ctx.moveTo(ev._x, ev._y);
-					return true;
-				};
-
-				// draw
-				this.touchmove = function (ev, scope) {
-					ctx.lineTo(ev._x, ev._y);
-					ctx.stroke();
-					return true;
-				};
-
-				// End draw
-				this.touchend = function (ev, scope) {
-					img_update();
-					return true;
-				};
-
-				// This is called when you start holding down the mouse button.
-				// This starts the pencil drawing.
-				this.mousedown = function (ev, scope) {
-					ctx.beginPath();
-					ctx.moveTo(ev._x, ev._y);
-					scope.started = true;
-					return true;
-				};
-
-				// This function is called every time you move the mouse. Obviously, it only
-				// draws if the tool.started state is set to true (when you are holding down
-				// the mouse button).
-				this.mousemove = function (ev, scope) {
-					if (scope.started) {
-						ctx.lineTo(ev._x, ev._y);
-						ctx.stroke();
-						return true;
-					}
-					return false;
-				};
-
-				// This is called when you release the mouse button.
-				this.mouseup = function (ev, scope) {
-					if (scope.started) {
-						tool.mousemove(ev, scope);
-						scope.started = false;
-						img_update();
-						return true;
-					}
-					return false;
-				};
-			}
-
-			//Rect
-			function ToolRect() {
-				var tool = this;
-
-				// This starts the pencil drawing.
-				this.touchstart = function (ev, scope) {
-					scope.x0 = ev._x;
-					scope.y0 = ev._y;
-					return true;
-				};
-
-				// draw
-				this.touchmove = function (ev, scope) {
-					var x = Math.min(ev._x,  scope.x0),
-						y = Math.min(ev._y,  scope.y0),
-						w = Math.abs(ev._x - scope.x0),
-						h = Math.abs(ev._y - scope.y0);
-
-					clear();
-
-					if (!w || !h) {
-						return false;
-					}
-
-					ctx.strokeRect(x, y, w, h);
-					return true;
-				};
-
-				// End draw
-				this.touchend = function (ev, scope) {
-					img_update();
-					return true;
-				};
-
-				this.mousedown = function (ev, scope) {
-					scope.started = true;
-					scope.x0 = ev._x;
-					scope.y0 = ev._y;
-					return true;
-				};
-
-				this.mousemove = function (ev, scope) {
-					if (!scope.started) {
-						return false;
-					}
-					return tool.touchmove(ev,scope);
-				};
-
-				this.mouseup = function (ev, scope) {
-					if (scope.started) {
-						tool.mousemove(ev, scope);
-						scope.started = false;
-						img_update();
-						return true;
-					}
-					return false;
-				};
-			}
-
-			//Line
-			function ToolLine(){
-				var tool = this;
-				this.started = false;
-
-				// This starts the pencil drawing.
-				this.touchstart = function (ev, scope) {
-					scope.x0 = ev._x;
-					scope.y0 = ev._y;
-					return true;
-				};
-
-				// draw
-				this.touchmove = function (ev, scope) {
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-					ctx.beginPath();
-					ctx.moveTo(scope.x0, scope.y0);
-					ctx.lineTo(ev._x,   ev._y);
-					ctx.stroke();
-					ctx.closePath();
-
-					return true;
-				};
-
-				// End draw
-				this.touchend = function (ev, scope) {
-					img_update();
-					return true;
-				};
-				this.mousedown = function (ev, scope) {
-					scope.started = true;
-					scope.x0 = ev._x;
-					scope.y0 = ev._y;
-					return true;
-				};
-
-				this.mousemove = function (ev, scope) {
-					if (!scope.started) {
-						return false;
-					}
-					tool.touchmove(ev, scope);
-				};
-
-				this.mouseup = function (ev, scope) {
-					if (scope.started) {
-						tool.mousemove(ev, scope);
-						scope.started = false;
-						img_update();
-						return true;
-					}
-					return false;
-				};
-			}
-
-			function clear(){
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-			}
-
-			function img_update () {
-				contexto.drawImage(subCanvas, 0, 0);
-				ctx.clearRect(0, 0, subCanvas.width, subCanvas.height);
-			}
+		//Create tools
+		function createTools(ctx){
 
 			return {
-				brush : new ToolPencil(),
-				rect : new ToolRect(),
-				line : new ToolLine()
+				brush : new PencilTool(ctx, canvas),
+				rect : new RectTool(ctx, canvas),
+				line : new LineTool(ctx, canvas)
 			};
 		}
 
+		//Create socketevent
+		function createEvent(ev, type){
+			context.strokeStyle = "rgba("+toolsCtrl.getColor().join(',')+",1)";
+			context.lineWidth = toolsCtrl.getLineWidth();
+			var offset = util.getPageOffset(canvas),
+				x = ev.pageX - offset.x,
+				y = ev.pageY - offset.y;
+			return {
+				type: type,
+				_x: x,
+				_y: y,
+				time: Date.now(),
+				tool: toolsCtrl.getTool(),
+				color: toolsCtrl.getColor(),
+				lineWidth: toolsCtrl.getLineWidth()
+			};
+		}
 
-		// The general-purpose event handler. This function just determines the mouse
-		// position relative to the canvas element.
-		function ev_canvas (ev) {
+		// Attach listeners.
+		canvas.addEventListener('touchstart', touchstart, false);
+		canvas.addEventListener('touchmove', touchmove, false);
+		canvas.addEventListener('touchend',   touchend, false);
+		canvas.addEventListener('mousedown',   mousedown, false);
+
+		function touchstart(ev){
 			ev.preventDefault();
 			for(var i=0;i<ev.touches.length;i++){
-				var tev = ev.touches[i];
-				singleEvent(tev,ev.type);
+				var tev = ev.touches[i],
+					e = createEvent(tev,'strokeStart');
+				tools[toolsCtrl.getTool()].strokeStart(e);
+				fire(e);
 			}
 		}
 
-		function simpleEventOnCanvas(ev){
-			singleEvent(ev,ev.type);
+		function touchmove(ev){
+			ev.preventDefault();
+			for(var i=0;i<ev.touches.length;i++){
+				var tev = ev.touches[i],
+					e = createEvent(tev,'stroke');
+				tools[toolsCtrl.getTool()].stroke(e);
+				fire(e);
+			}
 		}
 
-		function singleEvent (ev, type) {
-			var offset = util.getPageOffset(canvas);
-			ev._x = ev.pageX - offset.x;
-			ev._y = ev.pageY - offset.y;
+		function touchend(ev){
+			ev.preventDefault();
+			var e = createEvent(ev,'strokeEnd');
+			tools[toolsCtrl.getTool()].strokeEnd(e);
+			updateImgage(context, canvas);
+			fire(e);
+		}
 
-			// Call the event handler of the tool.
-			var tool = tools[toolsCtrl.getTool()],
-				func = tool[type];
-			if (func) {
-				context.strokeStyle = toolsCtrl.getColor();
-				context.lineWidth = toolsCtrl.getLineWidth();
-				var sEvent = {type: type,
-					_x: ev._x,
-					_y: ev._y,
-					time: Date.now(),
-					tool: toolsCtrl.getTool(),
-					color: toolsCtrl.getColor(),
-					lineWidth: toolsCtrl.getLineWidth()};
-				if(func(ev, tool)){
-					if(listener.onPaint)
-						listener.onPaint(sEvent);
-				}
-			}
+		function mousedown(ev){
+			var e = createEvent(ev,'strokeStart');
+			tools[toolsCtrl.getTool()].strokeStart(e);
+			fire(e);
+			canvas.addEventListener('mousemove',mousemove, false);
+			canvas.addEventListener('mouseup',mouseup, false);
+		}
+
+		function mousemove(ev){
+			var e = createEvent(ev,'stroke');
+			tools[toolsCtrl.getTool()].stroke(e);
+			fire(e);
+		}
+
+		function mouseup(ev){
+			var e = createEvent(ev,'strokeEnd');
+			tools[toolsCtrl.getTool()].strokeEnd(e);
+			updateImgage(context, canvas);
+			fire(e);
+			canvas.removeEventListener('mousemove',mousemove, false);
+			canvas.removeEventListener('mouseup',mouseup, false);
+		}
+
+		function fire(ev){
+			if(listener.onPaint)
+				listener.onPaint(ev);
+		}
+
+		function updateImgage(ctx, subCanvas){
+				contexto.drawImage(subCanvas, 0, 0);
+				ctx.clearRect(0, 0, subCanvas.width, subCanvas.height);
 		}
 
 		return {
@@ -273,8 +135,10 @@ function painter(document, util) {
 				sCanvas.height = canvaso.height;
 				canvaso.parentNode.appendChild(sCanvas);
 				var ctx = sCanvas.getContext("2d"),
-					tools = createTools(ctx,sCanvas);
+					tools = createTools(ctx);
 				ctx.lineCap = 'round';
+				ctx.lineJoin = 'round';
+
 
 				return {
 					setCanvasSize: function(c){
@@ -283,11 +147,15 @@ function painter(document, util) {
 					},
 					paint: function(sEvent){
 						var tool = tools[sEvent.tool],
-						func = tool[sEvent.type];
-						if (func) {
-							ctx.strokeStyle = sEvent.color;
+						strokeFunc = tool[sEvent.type];
+						if (strokeFunc) {
+							tool.color = sEvent.color;
+							ctx.strokeStyle = "rgba("+sEvent.color.join(',')+",1)";
 							ctx.lineWidth = sEvent.lineWidth;
-							func(sEvent, tool);
+							strokeFunc(sEvent);
+							if(sEvent.type==='strokeEnd'){
+								updateImgage(ctx, sCanvas);
+							}
 						}
 					}
 				};
@@ -298,4 +166,4 @@ function painter(document, util) {
 	};
 }
 
-module.exports = painter(document, util);
+module.exports = painter(document);
