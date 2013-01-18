@@ -4,15 +4,18 @@ var colorpicker = require("./colorpicker"),
 function tools (contextElm, win, $) {
 	'use strict';
 
-	var		currenttool = 'brush',
+	var		currenttool = 'sketch',
 			currentColor = [0,0,0],
 			currentLineWidth = 1,
 			colorbutton = contextElm.find(".colorsel"),
 			listener;
 
-	function setOn(button){
-		contextElm.find('button.on').removeClass("on");
-		$(button).addClass('on');
+	function toolClick(tool){
+		return function(e){
+			contextElm.find('button.on').removeClass("on");
+			$(this).addClass('on');
+			currenttool = tool;
+		};
 	}
 
 	//New
@@ -22,23 +25,17 @@ function tools (contextElm, win, $) {
 		}
 	});
 
-	//Brush click
-	contextElm.find('button.brush').click( function (e){
-		setOn(this);
-		currenttool = 'brush';
-	});
+	//Pencil click
+	contextElm.find('button.pencil').click(toolClick('pencil'));
+
+	//Pencil click
+	contextElm.find('button.sketch').click(toolClick('sketch'));
 
 	//Rect click
-	contextElm.find('button.rect').click(function(e){
-		setOn(this);
-		currenttool = 'rect';
-	});
+	contextElm.find('button.rect').click(toolClick('rect'));
 
 	//Line click
-	contextElm.find('button.line').click(function(e){
-		setOn(this);
-		currenttool = 'line';
-	});
+	contextElm.find('button.line').click(toolClick('line'));
 
 	//Color picker
 	var cp = colorpicker(contextElm.find(".color-canvas canvas").get(0));

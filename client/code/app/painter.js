@@ -1,5 +1,6 @@
 var util = require("./myutil"),
 	PencilTool = require("./tools/pencilTool"),
+	SketchTool = require("./tools/sketchTool"),
 	LineTool = require("./tools/lineTool"),
 	RectTool = require("./tools/rectTool");
 
@@ -28,7 +29,8 @@ function painter(document) {
 		function createTools(ctx){
 
 			return {
-				brush : new PencilTool(ctx, canvas),
+				pencil : new PencilTool(ctx, canvas),
+				sketch : new SketchTool(ctx, canvas),
 				rect : new RectTool(ctx, canvas),
 				line : new LineTool(ctx, canvas)
 			};
