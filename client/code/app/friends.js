@@ -7,16 +7,20 @@ function friends($, win) {
 		var findfriendInp = $('#findfriend'),
 			usersresult = $('#usersresult'),
 			//Buttons
-			btFriendRequest = {
+			btFriendRequest = [{
 				classname: 'bt-confirm',
 				label: 'Confirm'
-			},
+			},{
+				classname: 'bt-reject',
+				label: 'Reject'
+			}],
 			btFriend = [{
 				classname: 'bt-chat',
 				label: 'Chat'
 			}, {
 				classname: 'bt-remove',
-				icon: 'x'
+				icon: 'x',
+				title: 'Remove'
 			}];
 
 		function getButtons(context) {
@@ -73,8 +77,9 @@ function friends($, win) {
 					buttons: function() {
 						if(user.findFriendById(this._id)) return;
 						else return {
-							classname: 'add',
-							label: 'Add'
+							classname: 'bt-add',
+							icon: 'a',
+							label: 'Add friend'
 						};
 					}
 				}, {
@@ -95,7 +100,7 @@ function friends($, win) {
 			}
 		});
 		//Add friend
-		$('button.add').live('click', function() {
+		$('button.bt-add').live('click', function() {
 			var userElm = $(this).closest('li'),
 				id = userElm.attr('data-id');
 			//add friend
@@ -121,6 +126,16 @@ function friends($, win) {
 				return btFriendRequest;
 			};
 			$('#friends ul').append(ss.tmpl.user.render(friend));
+		});
+
+		//Reject friend
+		$('button.bt-reject').live('click', function(){
+			if(!win.confirm("Are you shure?")) return 0;
+			var userElm = $(this).closest('li'),
+				id = userElm.attr('data-id');
+			ss.rpc('user.removeFriend', {
+				_id: id
+			});
 		});
 
 		//Confirm friend

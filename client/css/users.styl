@@ -2,9 +2,6 @@
   position: absolute
   right: $pad
   top: $pad
-@media all and (max-width: 600px)
-  #user
-    display: none
 
 .search
     label
@@ -18,15 +15,30 @@
 
 #usersresult
   position: absolute
-  width: 100%
-  left: 0px
+  width: 60%
+  left: 100px
   z-index: 99999
   background-color: $popup-bg-color
+  .user-info
+    padding: $pad
   li
     overflow: hidden
     border-bottom:1px solid $bg-color
     position: relative
-
+.bt-add
+  background-color: lighten($bg-color,10%)
+  box-shadow: 0 0 5px darken($bg-color,40%) inset
+  padding: 2px 14px
+  border-radius: 9px
+  border: 1px solid darken($bg-color,20%)
+  font-size: 16px
+  position: absolute
+  right: 0
+  bottom: 0
+  &:before
+    padding-right: $pad
+    font-family: "Pictos Custom"
+    content: attr(data-icon)
 #friends
   ul
     overflow hidden
@@ -47,19 +59,31 @@
     height: 120px
     float: none
   button
+    display: block
     position: absolute
     visibility: hidden
     cursor: pointer
 
   .bt-chat,.bt-confirm
-    top: 96px
-    left: 32px
+    top: 66px
+    left: 22px
+    right: 22px
     background-color: lighten(green,10%)
     box-shadow: 0 0 5px darken(green,40%) inset
     color: #fff
     padding: 2px 14px
     border-radius: 9px
     border: 1px solid darken(green,20%)
+  .bt-reject
+    top: 96px
+    left: 22px
+    right: 22px
+    background-color: lighten(red,10%)
+    box-shadow: 0 0 5px darken(red,40%) inset
+    color: #fff
+    padding: 2px 14px
+    border-radius: 9px
+    border: 1px solid darken(red,20%)
   .bt-remove
     top: 3px
     right: 3px
@@ -91,3 +115,10 @@
   left: 2px
   &:before
     content: attr(data-icon)
+
+@media all and (max-width: 600px)
+  #user
+    display: none
+  #usersresult
+    left: 0px
+    width: 100%
