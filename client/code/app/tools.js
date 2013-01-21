@@ -1,71 +1,84 @@
+/*global require, module, $, window*/
 var colorpicker = require("./colorpicker"),
-	_inst;
+	inst;
 
-function tools (contextElm, win, $) {
+function tools(contextElm, win, $) {
 	'use strict';
 
-	var		currenttool = 'sketch',
-			currentColor = [0,0,0],
-			currentLineWidth = 1,
-			colorbutton = contextElm.find(".colorsel"),
-			listener;
+	var	currenttool = 'sketch',
+		currentColor = [0, 0, 0],
+		currentLineWidth = 1,
+		colorbutton = contextElm.find(".colorsel"),
+		toolsElm = contextElm.find(".tool"),
+		lineWidth = contextElm.find(".lw"),
+		listener,
+		cp;
 
-	function toolClick(tool){
-		return function(e){
-			contextElm.find('button.on').removeClass("on");
+	function toolClick(tool) {
+		return function (e) {
+			toolsElm.find('.on').removeClass("on");
 			$(this).addClass('on');
 			currenttool = tool;
 		};
 	}
 
+	function lwClick(lw) {
+		return function (e) {
+			lineWidth.find(".on").removeClass("on");
+			$(this).addClass("on");
+			currentLineWidth = lw;
+		};
+	}
+
 	//New
-	contextElm.find('button.new').click( function (e){
-		if(listener && win.confirm('New canvas?')){
+	contextElm.find('button.new').click(function (e) {
+		if (listener && win.confirm('New canvas?')) {
 			listener.onClear();
 		}
 	});
 
 	//Pencil click
-	contextElm.find('button.pencil').click(toolClick('pencil'));
+	toolsElm.find('.tool-pencil').click(toolClick('pencil'));
 
 	//Pencil click
-	contextElm.find('button.sketch').click(toolClick('sketch'));
+	toolsElm.find('.tool-sketch').click(toolClick('sketch'));
 
 	//Rect click
-	contextElm.find('button.rect').click(toolClick('rect'));
+	toolsElm.find('.tool-rect').click(toolClick('rect'));
 
 	//Line click
-	contextElm.find('button.line').click(toolClick('line'));
+	toolsElm.find('.tool-line').click(toolClick('line'));
 
 	//Color picker
-	var cp = colorpicker(contextElm.find(".color-canvas canvas").get(0));
-	cp.onChange(function(color){
-		colorbutton.css('background-color',"rgba("+color.join(",")+",1)");
+	cp = colorpicker(contextElm.find(".color-canvas canvas").get(0));
+	cp.onChange(function (color) {
+		colorbutton.css('background-color', "rgba(" + color.join(",") + ",1)");
 		currentColor = color;
 	});
 
 	//Line width
-	var lineWidth = contextElm.find('div.line-width input');
-	lineWidth.change( function(e){
-		currentLineWidth = lineWidth.val();
-	});
+	lineWidth.find(".lw-1").click(lwClick(1));
+	lineWidth.find(".lw-2").click(lwClick(3));
+	lineWidth.find(".lw-3").click(lwClick(5));
+	lineWidth.find(".lw-4").click(lwClick(7));
 
 	return {
-		getTool : function(){
+		getTool : function () {
 			return currenttool;
 		},
-		getColor : function(){
+		getColor : function () {
 			return currentColor;
 		},
-		getLineWidth : function(){
+		getLineWidth : function () {
 			return currentLineWidth;
 		},
-		setListener : function(newListener) {
+		setListener : function (newListener) {
 			listener = newListener;
 		}
 	};
 }
-module.exports = function(){
-	_inst = _inst || tools($('.toolbar'),window,$);
-	return _inst;
+module.exports = function () {
+	'use strict';
+	inst = inst || tools($('.toolbar'), window, $);
+	return inst;
 };

@@ -6,19 +6,44 @@
 		<a href="#" class="menu">Menu</a>
 	</nav>
     <div class="toolbar">
-        <button class="new" data-icon="n"></button>
-        <button class="pencil" data-icon="p"></button>
-        <button class="on sketch" data-icon="s"></button>
-        <button class="rect" data-icon="r"></button>
-        <button class="line" data-icon="l"></button>
+        <button class="button new" data-icon="n"></button>
+        <div class="dd-button tool">
+            <ul class="dd-list">
+                <li class="tool-pencil">
+                    <button data-icon="p"></button>        
+                </li>
+                <li class="tool-sketch on">
+                    <button data-icon="s"></button>
+                </li>
+                <li class="tool-rect">
+                    <button data-icon="r"></button>                    
+                </li>
+                <li class="tool-line">
+                    <button data-icon="l"></button>        
+                </li>
+            </ul>
+        </div>
         <div class="button">
             <i class="colorsel" id="colorsel"></i>
             <div class="color-canvas">
                  <canvas width="256" height="256"></canvas>
             </div>
         </div>
-        <div class="line-width">
-            <input type="range" min="1" max="60" value="1">
-        </div>
+        <div class="dd-button lw">
+            <ul class="dd-list">
+                <li class="lw-1 on">
+                    <div></div>
+                </li>
+                <li class="lw-2">
+                    <div></div>
+                </li>
+                <li class="lw-3">
+                    <div></div>
+                </li>
+                <li class="lw-4">
+                    <div></div>
+                </li>
+            </ul>
+        <div>
     </div>
 </div>
