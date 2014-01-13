@@ -1,7 +1,6 @@
 glisa
 =====
-Real time drawing + chat using [nodejs](http://nodejs.org/) and [socketstream](https://github.com/socketstream/socketstream)
-http://glisa.herokuapp.com/
+Real time drawing + chat using [nodejs](http://nodejs.org/) and [socketstream](https://github.com/socketstream/socketstream). See demo at: http://glisa.herokuapp.com/
 
 ### Dev
 * install [nodejs](http://nodejs.org/) and [mongodb](http://www.mongodb.org/)
