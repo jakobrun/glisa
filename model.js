@@ -3,14 +3,16 @@ var mongojs = require('mongojs'),
     async = require('async'),
     _ = require('underscore'),
     mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'glisa',
-    c = mongojs.connect(mongoUri, ['user']);
+    c = _.once(function() {
+        return mongojs.connect(mongoUri, ['user']);
+    });
 
 function User() {
 
 }
 
 User.logAllOut = function(cb) {
-    c.user.update({
+    c().user.update({
         'online': true
     }, {
         $set: {
@@ -22,19 +24,19 @@ User.logAllOut = function(cb) {
 };
 
 User.findAll = function(cb) {
-    c.user.find(cb);
+    c().user.find(cb);
 };
 
 User.findOne = function() {
     if (arguments.length === 2) {
-        c.user.findOne(arguments[0], arguments[1]);
+        c().user.findOne(arguments[0], arguments[1]);
     } else {
-        c.user.findOne(arguments[0], arguments[1], arguments[2]);
+        c().user.findOne(arguments[0], arguments[1], arguments[2]);
     }
 };
 
 User.findBySourceId = function(source, id, cb) {
-    c.user.findOne({
+    c().user.findOne({
         source: source,
         sourceid: id
     }, function(err, doc) {
@@ -62,7 +64,7 @@ User.logout = function(user, cb) {
 
 User.tick = function(user, cb, tcb) {
     user.onlinetime = Date.now();
-    c.user.update({
+    c().user.update({
         _id: user._id
     }, {
         $set: {
@@ -85,7 +87,7 @@ User.tick = function(user, cb, tcb) {
 
 User.updateOnline = function(user, cb) {
     console.log(user.name, 'online:', user.online);
-    c.user.update({
+    c().user.update({
         _id: user._id
     }, {
         $set: {
@@ -98,14 +100,14 @@ User.updateOnline = function(user, cb) {
 };
 
 User.findById = function(id, cb) {
-    c.user.findOne({
-        _id: c.ObjectId(id)
+    c().user.findOne({
+        _id: c().ObjectId(id)
     }, cb);
 };
 
 User.findByName = function(name, userid, cb) {
     var q = new RegExp(name, 'i');
-    c.user.find({
+    c().user.find({
         name: q,
         _id: {
             $ne: userid
@@ -116,7 +118,7 @@ User.findByName = function(name, userid, cb) {
 };
 
 User.update = function(doc, cb) {
-    c.user.update({
+    c().user.update({
         _id: doc._id
     }, doc, {
         multi: false
@@ -131,7 +133,7 @@ User.findFriendsOnlineStatus = function(user, cb) {
             })
         }
     };
-    c.user.find(query, {
+    c().user.find(query, {
         friends: 0
     }, function(err, list) {
         if (err) cb(err);
@@ -147,7 +149,7 @@ User.findFriendsOnlineStatus = function(user, cb) {
 };
 
 User.findOnlineFriends = function(user, cb) {
-    c.user.find({
+    c().user.find({
         'friends._id': user._id,
         'online': true
     }, cb);
@@ -182,12 +184,13 @@ User.addFriend = function(user, friend, cb) {
 
 
 User.acceptFriend = function(user, friendreq, cb) {
-    c.user.findOne({
-        _id: typeof(friendreq._id) === 'string' ? c.ObjectId(friendreq._id) : friendreq._id
+    c().user.findOne({
+        _id: typeof(friendreq._id) === 'string' ? c().ObjectId(friendreq._id) : friendreq._id
     }, function(err, friend) {
         var userFriendReq = User.findFriend(friend, user._id);
-        if (!userFriendReq) cb('Friend user friendreq not found, id: ' + user._id);
-        else {
+        if (!userFriendReq) {
+            cb('Friend user friendreq not found, id: ' + user._id);
+        } else {
             userFriendReq.status = 'friend';
             friendreq.status = 'friend';
             async.map([user, friend], User.update, function(err) {
@@ -236,19 +239,26 @@ User.addGoogleUser = function(gu, cb) {
         createtime: new Date()
     };
 
-    c.user.save(u, function(err, doc) {
+    c().user.save(u, function(err, doc) {
         cb(err, doc);
     });
 };
 
 User.insertAll = function(docs, cb) {
     async.mapSeries(docs, function(doc, subCb) {
-        c.user.insert(doc, subCb);
+        c().user.insert(doc, subCb);
     }, cb);
 };
 
 User.removeAll = function() {
-    c.user.remove({});
+    c().user.remove({});
 };
 
-exports.User = User;
+var m = {
+    User: User,
+    setConnectionString: function(connectionString) {
+        mongoUri = connectionString;
+        return m;
+    }
+};
+module.exports = m;
