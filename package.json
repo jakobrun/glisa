@@ -2,7 +2,7 @@
   "name": "Glisa",
   "subdomain": "glisa",
   "scripts": {
-    "start": "app.js",
+    "start": "node app.js",
     "test": "mocha -r should"
   },
   "description": "App for sketch-chatting",

@@ -38,9 +38,10 @@ ss.client.templateEngine.use(require('ss-hogan'));
 if (ss.env === 'production') ss.client.packAssets();
 
 // Start web server
-var server = http.Server(ss.http.middleware);
-console.log('port', process.env.PORT);
-server.listen(process.env.PORT ||  3000);
+var server = http.Server(ss.http.middleware),
+	port = process.env.PORT ||  3000;
+console.log('port', port);
+server.listen(port);
 
 // Start SocketStream
 ss.start(server);
